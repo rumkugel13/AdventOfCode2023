@@ -27,3 +27,7 @@ func max(a, b int) int {
 func isDigit(a byte) bool {
 	return a >= '0' && a <='9'
 }
+
+type Point struct {
+	x, y int
+}
