@@ -7,7 +7,7 @@ import (
 )
 
 func day04() {
-	lines := getLines("04.txt")
+	lines := getLines("input/04.txt")
 	var points = 0
 	var winnings = make([]int, len(lines))
 

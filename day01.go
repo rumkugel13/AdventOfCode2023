@@ -8,7 +8,7 @@ import (
 var numbers = map[string]int{"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9}
 
 func day01() {
-	lines := getLines("01.txt")
+	lines := getLines("input/01.txt")
 
 	var result = getSum(lines, false)
 	var result2 = getSum(lines, true)

@@ -6,7 +6,7 @@ import (
 )
 
 func day03() {
-	schematics := getLines("03.txt")
+	schematics := getLines("input/03.txt")
 	var partNumberSum, gearRatioSum int
 	var gears = map[Point][]int{}
 

@@ -7,7 +7,7 @@ import (
 )
 
 func day02() {
-	lines := getLines("02.txt")
+	lines := getLines("input/02.txt")
 	var sum, powersum int
 
 	for _, line := range lines {
