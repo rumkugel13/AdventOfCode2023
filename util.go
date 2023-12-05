@@ -25,6 +25,13 @@ func max(a, b int) int {
 	return b
 }
 
+func abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}
+
 func isDigit(a byte) bool {
 	return a >= '0' && a <='9'
 }
