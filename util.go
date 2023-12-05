@@ -3,6 +3,7 @@ package main
 import ( 
 	"os" 
 	"strings"
+	"strconv"
 )
 
 func getLines(file string) []string {
@@ -30,4 +31,13 @@ func isDigit(a byte) bool {
 
 type Point struct {
 	x, y int
+}
+
+func strToNumArray(numStr string) []int {
+	var nums []int
+	for _, n := range strings.Fields(strings.TrimSpace(numStr)) {
+		i, _ := strconv.Atoi(n)
+		nums = append(nums, i)
+	}
+	return nums
 }
