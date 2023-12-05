@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"math"
-	"strconv"
-	"strings"
 )
 
 type Range struct {
@@ -96,17 +94,9 @@ func parseRangeMaps(lines []string) RangeMaps {
 			maps = append(maps, RangeMap{})
 			i++
 		} else {
-			maps[section] = append(maps[section], parseRange(lines[i]))
+			nums := strToNumArray(lines[i])
+			maps[section] = append(maps[section], Range{nums[0], nums[1], nums[2]})
 		}
 	}
 	return maps
-}
-
-func parseRange(line string) Range {
-	var r Range
-	split := strings.Fields(line)
-	r.destination, _ = strconv.Atoi(split[0])
-	r.source, _ = strconv.Atoi(split[1])
-	r.length, _ = strconv.Atoi(split[2])
-	return r
 }

@@ -1,9 +1,9 @@
 package main
 
-import ( 
-	"os" 
-	"strings"
+import (
+	"os"
 	"strconv"
+	"strings"
 )
 
 func getLines(file string) []string {
@@ -33,7 +33,7 @@ func abs(n int) int {
 }
 
 func isDigit(a byte) bool {
-	return a >= '0' && a <='9'
+	return a >= '0' && a <= '9'
 }
 
 type Point struct {
