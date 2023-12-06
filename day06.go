@@ -11,21 +11,18 @@ func day06() {
 	times := strToNumArray(input[0][5:])
 	distances := strToNumArray(input[1][9:])
 
-	winningCounts := make([]int, len(times))
+	winners := 1
 	for race := 0; race < len(times); race++ {
-		totalTime := times[race]
-		totalDistance := distances[race]
-		for time := 1; time < totalTime; time++ {
-			if getDistance(time, totalTime) > totalDistance {
-				winningCounts[race]++
+		winCount := 0
+		for time := 1; time < times[race]; time++ {
+			if getDistance(time, times[race]) > distances[race] {
+				winCount++
 			}
 		}
+		winners *= winCount
 	}
 
-	var result = 1
-	for _,count := range winningCounts {
-		result *= count
-	}
+	var result = winners
 	fmt.Println("Day 06 Part 1 Result: ", result)
 
 	actualTime,_ := strconv.Atoi(strings.ReplaceAll(input[0][5:], " ", ""))
