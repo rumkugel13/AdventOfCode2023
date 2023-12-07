@@ -26,14 +26,14 @@ func day07() {
 		entries2 = append(entries2, TypeAndBid{handAndBid[0], handType2, bid})
 	}
 
-	var result = getCount(entries, false)
+	var result = getWinnings(entries, false)
 	fmt.Println("Day 07 Part 1 Result: ", result)
 
-	var result2 = getCount(entries2, true)
+	var result2 = getWinnings(entries2, true)
 	fmt.Println("Day 07 Part 2 Result: ", result2)
 }
 
-func getCount(entries []TypeAndBid, part2 bool) int {
+func getWinnings(entries []TypeAndBid, part2 bool) int {
 	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].handType == entries[j].handType {
 			return lessHandType(entries[i].hand, entries[j].hand, part2)
@@ -41,11 +41,11 @@ func getCount(entries []TypeAndBid, part2 bool) int {
 		return entries[i].handType < entries[j].handType
 	})
 
-	count := 0
+	winnings := 0
 	for i, entry := range entries {
-		count += (i + 1) * entry.bid
+		winnings += (i + 1) * entry.bid
 	}
-	return count
+	return winnings
 }
 
 func lessHandType(hand1, hand2 string, part2 bool) bool {
