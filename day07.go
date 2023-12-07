@@ -53,13 +53,9 @@ func lessHandType(hand1, hand2 string, part2 bool) bool {
 	if part2 {
 		nums['J'] = 1
 	}
-	for i, a := range hand1 {
-		if byte(a) == hand2[i] {
-			continue
-		} else if nums[byte(a)] < nums[hand2[i]] {
-			return true
-		} else {
-			return false
+	for i := range hand1 {
+		if hand1[i] != hand2[i] {
+			return nums[hand1[i]] < nums[hand2[i]]
 		}
 	}
 	return false
@@ -67,8 +63,10 @@ func lessHandType(hand1, hand2 string, part2 bool) bool {
 
 func getHandType(hand string, part2 bool) int {
 	cards := map[byte]int{}
+	highestCount := 0
 	for _, card := range hand {
 		cards[byte(card)]++
+		highestCount = max(highestCount, cards[byte(card)])
 	}
 
 	jokers := cards['J']
@@ -80,20 +78,16 @@ func getHandType(hand string, part2 bool) int {
 		if part2 && jokers > 0 {
 			return 6
 		}
-		for _, count := range cards {
-			if count == 4 {
-				return 5
-			}
+		if highestCount == 4 {
+			return 5
 		}
 		return 4
 	case 3:
-		for _, count := range cards {
-			if count == 3 {
-				if part2 && jokers > 0 {
-					return 5
-				}
-				return 3
+		if highestCount == 3 {
+			if part2 && jokers > 0 {
+				return 5
 			}
+			return 3
 		}
 		if part2 && jokers > 1 {
 			return 5
