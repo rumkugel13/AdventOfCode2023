@@ -41,10 +41,11 @@ type Point struct {
 }
 
 func strToNumArray(numStr string) []int {
-	var nums []int
-	for _, n := range strings.Fields(strings.TrimSpace(numStr)) {
-		i, _ := strconv.Atoi(n)
-		nums = append(nums, i)
+	fields := strings.Fields(strings.TrimSpace(numStr))
+	var nums = make([]int, len(fields))
+	for i, field := range fields {
+		num, _ := strconv.Atoi(field)
+		nums[i] = num
 	}
 	return nums
 }
