@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -13,9 +12,9 @@ func day04() {
 
 	for i, line := range lines {
 		numbers := strings.Split(strings.Split(line, ":")[1], "|")
-		haveNum := getNums(numbers[0])
-		winningNum := getNums(numbers[1])
-		winnings[i] = countWinnings(haveNum, winningNum)
+		haveNums := strToNumArray(numbers[0])
+		winningNums := strToNumArray(numbers[1])
+		winnings[i] = countWinnings(haveNums, winningNums)
 		points += pow2(winnings[i])
 	}
 
@@ -53,13 +52,4 @@ func pow2(n int) int {
 		return 1 << (n - 1)
 	}
 	return 0
-}
-
-func getNums(numStr string) []int {
-	var nums []int
-	for _, n := range strings.Fields(strings.TrimSpace(numStr)) {
-		i, _ := strconv.Atoi(n)
-		nums = append(nums, i)
-	}
-	return nums
 }
