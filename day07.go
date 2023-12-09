@@ -14,16 +14,16 @@ type TypeAndBid struct {
 
 func day07() {
 	input := getLines("input/07.txt")
-	entries := []TypeAndBid{}
-	entries2 := []TypeAndBid{}
+	entries := make([]TypeAndBid, len(input))
+	entries2 := make([]TypeAndBid, len(input))
 
-	for _, hand := range input {
+	for i, hand := range input {
 		handAndBid := strings.Fields(hand)
 		handType := getHandType(handAndBid[0], false)
 		handType2 := getHandType(handAndBid[0], true)
 		bid, _ := strconv.Atoi(handAndBid[1])
-		entries = append(entries, TypeAndBid{handAndBid[0], handType, bid})
-		entries2 = append(entries2, TypeAndBid{handAndBid[0], handType2, bid})
+		entries[i] = TypeAndBid{handAndBid[0], handType, bid}
+		entries2[i] = TypeAndBid{handAndBid[0], handType2, bid}
 	}
 
 	var result = getWinnings(entries, false)
