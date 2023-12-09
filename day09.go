@@ -10,8 +10,9 @@ func day09() {
 	predictSum, predictSum2 := 0, 0
 	for _, line := range lines {
 		sequence := strToNumArray(line)
-		predictSum += predict(sequence, false)
-		predictSum2 += predict(sequence, true)
+		part1, part2 := predict(sequence)
+		predictSum += part1
+		predictSum2 += part2
 	}
 
 	var result = predictSum
@@ -20,7 +21,7 @@ func day09() {
 	fmt.Println("Day 09 Part 2 Result: ", result2)
 }
 
-func predict(sequence []int, part2 bool) int {
+func predict(sequence []int) (next, prev int) {
 	differences := make([]int, len(sequence)-1)
 	allZeroes := true
 	for i := 0; i < len(sequence)-1; i++ {
@@ -29,12 +30,9 @@ func predict(sequence []int, part2 bool) int {
 			allZeroes = false
 		}
 	}
-	nextVal := 0
+	prevVal, nextVal := 0, 0
 	if !allZeroes {
-		nextVal = predict(differences, part2)
+		nextVal, prevVal = predict(differences)
 	}
-	if part2 {
-		return sequence[0] - nextVal
-	}
-	return sequence[len(sequence)-1] + nextVal
+	return sequence[len(sequence)-1] + nextVal, sequence[0] - prevVal
 }
