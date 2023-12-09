@@ -27,26 +27,14 @@ func day02() {
 				color := colorAmount[1]
 				switch color {
 				case "red":
-					if amount > rmax {
-						possible = false
-					}
-					if amount > rmin {
-						rmin = amount
-					}
+					possible = possible && !(amount > rmax)
+					rmin = max(rmin, amount)
 				case "green":
-					if amount > gmax {
-						possible = false
-					}
-					if amount > gmin {
-						gmin = amount
-					}
+					possible = possible && !(amount > gmax)
+					gmin = max(gmin, amount)
 				case "blue":
-					if amount > bmax {
-						possible = false
-					}
-					if amount > bmin {
-						bmin = amount
-					}
+					possible = possible && !(amount > bmax)
+					bmin = max(bmin, amount)
 				}
 			}
 		}
