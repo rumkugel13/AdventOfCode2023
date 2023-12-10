@@ -30,7 +30,7 @@ func day10() {
 
 	countInside := 0
 	for y, row := range grid {
-		count := 0
+		inside := false
 		for x := 0; x < len(row); x++ {
 			tile := row[x]
 			point := Point{x, y}
@@ -38,25 +38,10 @@ func day10() {
 				tile = findStartTile(point, grid)
 			}
 			if _, part := visited[point]; part {
-				if tile == '|' {
-					count++
-				} else if tile != '-' && tile != '.' {
-					if tile == 'L' {
-						for x++; x < len(row) && row[x] == '-'; x++ {
-						}
-						if x < len(row) && row[x] == '7' {
-							count++
-						}
-					}
-					if tile == 'F' {
-						for x++; x < len(row) && row[x] == '-'; x++ {
-						}
-						if x < len(row) && row[x] == 'J' {
-							count++
-						}
-					}
+				if tile == '|' || tile == 'L' || tile == 'J' {
+					inside = !inside
 				}
-			} else if count%2 == 1 {
+			} else if inside {
 				countInside++
 			}
 		}
