@@ -47,16 +47,16 @@ func isInside(grid []string, p Point, theLoop map[Point]int) bool {
 	}
 	count := 0
 	cornerCounts := map[byte]int{}
-	for y := p.y + 1; y < len(grid); y++ {
-		check := Point{p.x, y}
-		tile := grid[y][p.x]
+	for x := p.x + 1; x < len(grid[0]); x++ {
+		check := Point{x, p.y}
+		tile := grid[p.y][x]
 		if tile == 'S' {
-			tile = findStartTile(Point{p.x, y}, grid)
+			tile = findStartTile(Point{x, p.y}, grid)
 		}
 		if _,part := theLoop[check]; part {
-			if (tile == '-') {
+			if (tile == '|') {
 				count++
-			} else if tile != '|' && tile != '.' {
+			} else if tile != '-' && tile != '.' {
 				cornerCounts[tile]++
 			}
 		}
