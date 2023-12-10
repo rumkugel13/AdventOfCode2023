@@ -8,7 +8,7 @@ func day10() {
 	grid := getLines("input/10.txt")
 
 	startingPoint := findStart(grid)
-	visited := map[Point]int{startingPoint:0}
+	visited := map[Point]int{startingPoint: 0}
 	notChecked := []Point{startingPoint}
 
 	maxDist := 0
@@ -16,22 +16,47 @@ func day10() {
 		current := notChecked[0]
 		notChecked = notChecked[1:]
 		next := nextPoints(grid, current)
-		for _,point := range next {
-			if _,found := visited[point]; !found {
+		for _, point := range next {
+			if _, found := visited[point]; !found {
 				visited[point] = visited[current] + 1
-				maxDist = max(maxDist, visited[current] + 1)
+				maxDist = max(maxDist, visited[current]+1)
 				notChecked = append(notChecked, point)
 			}
 		}
 	}
-	
+
 	var result = maxDist
 	fmt.Println("Day 10 Part 1 Result: ", result)
 
 	countInside := 0
 	for y, row := range grid {
-		for x := range row {
-			if isInside(grid, Point{x, y}, visited) {
+		count := 0
+		for x := 0; x < len(row); x++ {
+			tile := row[x]
+			point := Point{x, y}
+			if tile == 'S' {
+				tile = findStartTile(point, grid)
+			}
+			if _, part := visited[point]; part {
+				if tile == '|' {
+					count++
+				} else if tile != '-' && tile != '.' {
+					if tile == 'L' {
+						for x++; x < len(row) && row[x] == '-'; x++ {
+						}
+						if x < len(row) && row[x] == '7' {
+							count++
+						}
+					}
+					if tile == 'F' {
+						for x++; x < len(row) && row[x] == '-'; x++ {
+						}
+						if x < len(row) && row[x] == 'J' {
+							count++
+						}
+					}
+				}
+			} else if count%2 == 1 {
 				countInside++
 			}
 		}
@@ -39,32 +64,6 @@ func day10() {
 
 	var result2 = countInside
 	fmt.Println("Day 10 Part 2 Result: ", result2)
-}
-
-func isInside(grid []string, p Point, theLoop map[Point]int) bool {
-	if _,part := theLoop[p]; part {
-		return false
-	}
-	count := 0
-	cornerCounts := map[byte]int{}
-	for x := p.x + 1; x < len(grid[0]); x++ {
-		check := Point{x, p.y}
-		tile := grid[p.y][x]
-		if tile == 'S' {
-			tile = findStartTile(Point{x, p.y}, grid)
-		}
-		if _,part := theLoop[check]; part {
-			if (tile == '|') {
-				count++
-			} else if tile != '-' && tile != '.' {
-				cornerCounts[tile]++
-			}
-		}
-	}
-
-	count += max(cornerCounts['L'], cornerCounts['7']) - abs(cornerCounts['L'] - cornerCounts['7'])
-	count += max(cornerCounts['F'], cornerCounts['J']) - abs(cornerCounts['F'] - cornerCounts['J'])
-	return count % 2 == 1
 }
 
 func findStart(grid []string) Point {
