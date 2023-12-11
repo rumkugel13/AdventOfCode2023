@@ -7,8 +7,8 @@ import (
 func day11() {
 	universe := getLines("input/11.txt")
 	galaxies := findGalaxies(universe)
-	emptyRows, emptyCols := emptySpace(universe, galaxies)
-	distances, dist2 := getDistances(galaxies, emptyRows, emptyCols)
+	emptyRows, emptyCols := getEmptySpace(universe, galaxies)
+	distances, dist2 := getGalaxyDistances(galaxies, emptyRows, emptyCols)
 
 	var result = distances
 	var result2 = dist2
@@ -28,7 +28,7 @@ func findGalaxies(universe []string) map[Point]bool {
 	return galaxies
 }
 
-func getDistances(galaxies map[Point]bool, emptyRows, emptyCols []int) (int, int) {
+func getGalaxyDistances(galaxies map[Point]bool, emptyRows, emptyCols []int) (int, int) {
 	galaxyList := make([]Point, 0, len(galaxies))
 	for galaxy := range galaxies {
 		galaxyList = append(galaxyList, galaxy)
@@ -39,27 +39,7 @@ func getDistances(galaxies map[Point]bool, emptyRows, emptyCols []int) (int, int
 		galaxyA := galaxyList[i]
 		for j := i + 1; j < len(galaxyList); j++ {
 			galaxyB := galaxyList[j]
-			minx, miny := min(galaxyA.x, galaxyB.x), min(galaxyA.y, galaxyB.y)
-			maxx, maxy := max(galaxyA.x, galaxyB.x), max(galaxyA.y, galaxyB.y)
-
-			expansionX, expansionY := 0, 0
-			expansionX2, expansionY2 := 0, 0
-			for _, val := range emptyCols {
-				if minx < val && val < maxx {
-					expansionX++
-					expansionX2 += 999_999
-				}
-			}
-
-			for _, val := range emptyRows {
-				if miny < val && val < maxy {
-					expansionY++
-					expansionY2 += 999_999
-				}
-			}
-
-			dist := (maxx - minx) + (maxy - miny) + expansionX + expansionY
-			dist2 := (maxx - minx) + (maxy - miny) + expansionX2 + expansionY2
+			dist, dist2 := getGalaxyDistance(galaxyA, galaxyB, emptyRows, emptyCols)
 			distances += dist
 			distances2 += dist2
 		}
@@ -68,7 +48,32 @@ func getDistances(galaxies map[Point]bool, emptyRows, emptyCols []int) (int, int
 	return distances, distances2
 }
 
-func emptySpace(universe []string, galaxies map[Point]bool) ([]int, []int) {
+func getGalaxyDistance(galaxyA, galaxyB Point, emptyRows, emptyCols []int) (int, int) {
+	minx, miny := min(galaxyA.x, galaxyB.x), min(galaxyA.y, galaxyB.y)
+	maxx, maxy := max(galaxyA.x, galaxyB.x), max(galaxyA.y, galaxyB.y)
+
+	expansionX, expansionY := 0, 0
+	expansionX2, expansionY2 := 0, 0
+	for _, val := range emptyCols {
+		if minx < val && val < maxx {
+			expansionX++
+			expansionX2 += 999_999
+		}
+	}
+
+	for _, val := range emptyRows {
+		if miny < val && val < maxy {
+			expansionY++
+			expansionY2 += 999_999
+		}
+	}
+
+	dist := (maxx - minx) + (maxy - miny) + expansionX + expansionY
+	dist2 := (maxx - minx) + (maxy - miny) + expansionX2 + expansionY2
+	return dist, dist2
+}
+
+func getEmptySpace(universe []string, galaxies map[Point]bool) ([]int, []int) {
 	emptyRows, emptyCols := []int{}, []int{}
 	for i := 0; i < len(universe); i++ {
 		if rowEmpty(universe, galaxies, i) {
