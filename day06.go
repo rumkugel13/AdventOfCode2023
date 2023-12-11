@@ -15,7 +15,7 @@ func day06() {
 	for race := 0; race < len(times); race++ {
 		winCount := 0
 		for time := 1; time < times[race]; time++ {
-			if getDistance(time, times[race]) > distances[race] {
+			if time * (times[race] - time) > distances[race] {
 				winCount++
 			}
 		}
@@ -30,16 +30,11 @@ func day06() {
 
 	var winningCount = 0
 	for time := 1; time < actualTime; time++ {
-		if getDistance(time, actualTime) > actualDist {
+		if time * (actualTime - time) > actualDist {
 			winningCount++
 		}
 	}
 
 	var result2 = winningCount
 	fmt.Println("Day 06 Part 2 Result: ", result2)
-}
-
-func getDistance(holdTime, totalTime int) int {
-	remainingTime := totalTime - holdTime
-	return holdTime * remainingTime
 }
