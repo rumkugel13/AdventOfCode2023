@@ -7,7 +7,7 @@ import (
 func day11() {
 	universe := getLines("input/11.txt")
 	galaxies := findGalaxies(universe)
-	emptyRows, emptyCols := getEmptySpace(universe, galaxies)
+	emptyRows, emptyCols := getEmptySpace(universe)
 	distances, dist2 := getGalaxyDistances(galaxies, emptyRows, emptyCols)
 
 	var result = distances
@@ -16,29 +16,24 @@ func day11() {
 	fmt.Println("Day 11 Part 2 Result: ", result2)
 }
 
-func findGalaxies(universe []string) map[Point]bool {
-	galaxies := map[Point]bool{}
+func findGalaxies(universe []string) []Point {
+	galaxies := []Point{}
 	for y, row := range universe {
 		for x, char := range row {
 			if char == '#' {
-				galaxies[Point{x, y}] = true
+				galaxies = append(galaxies, Point{x, y})
 			}
 		}
 	}
 	return galaxies
 }
 
-func getGalaxyDistances(galaxies map[Point]bool, emptyRows, emptyCols []int) (int, int) {
-	galaxyList := make([]Point, 0, len(galaxies))
-	for galaxy := range galaxies {
-		galaxyList = append(galaxyList, galaxy)
-	}
-
+func getGalaxyDistances(galaxies []Point, emptyRows, emptyCols []int) (int, int) {
 	distances, distances2 := 0, 0
-	for i := 0; i < len(galaxyList); i++ {
-		galaxyA := galaxyList[i]
-		for j := i + 1; j < len(galaxyList); j++ {
-			galaxyB := galaxyList[j]
+	for i := 0; i < len(galaxies); i++ {
+		galaxyA := galaxies[i]
+		for j := i + 1; j < len(galaxies); j++ {
+			galaxyB := galaxies[j]
 			dist, dist2 := getGalaxyDistance(galaxyA, galaxyB, emptyRows, emptyCols)
 			distances += dist
 			distances2 += dist2
@@ -70,31 +65,31 @@ func expandSpaceBetween(emptySpace []int, min, max int) (a, b int) {
 	return
 }
 
-func getEmptySpace(universe []string, galaxies map[Point]bool) ([]int, []int) {
+func getEmptySpace(universe []string) ([]int, []int) {
 	emptyRows, emptyCols := []int{}, []int{}
 	for i := 0; i < len(universe); i++ {
-		if rowEmpty(universe, galaxies, i) {
+		if rowEmpty(universe, i) {
 			emptyRows = append(emptyRows, i)
 		}
-		if colEmpty(universe, galaxies, i) {
+		if colEmpty(universe, i) {
 			emptyCols = append(emptyCols, i)
 		}
 	}
 	return emptyRows, emptyCols
 }
 
-func rowEmpty(universe []string, galaxies map[Point]bool, row int) bool {
+func rowEmpty(universe []string, row int) bool {
 	for x := 0; x < len(universe[0]); x++ {
-		if _, found := galaxies[Point{x, row}]; found {
+		if universe[row][x] == '#' {
 			return false
 		}
 	}
 	return true
 }
 
-func colEmpty(universe []string, galaxies map[Point]bool, col int) bool {
+func colEmpty(universe []string, col int) bool {
 	for y := 0; y < len(universe); y++ {
-		if _, found := galaxies[Point{col, y}]; found {
+		if universe[y][col] == '#' {
 			return false
 		}
 	}
