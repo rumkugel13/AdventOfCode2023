@@ -52,25 +52,22 @@ func getGalaxyDistance(galaxyA, galaxyB Point, emptyRows, emptyCols []int) (int,
 	minx, miny := min(galaxyA.x, galaxyB.x), min(galaxyA.y, galaxyB.y)
 	maxx, maxy := max(galaxyA.x, galaxyB.x), max(galaxyA.y, galaxyB.y)
 
-	expansionX, expansionY := 0, 0
-	expansionX2, expansionY2 := 0, 0
-	for _, val := range emptyCols {
-		if minx < val && val < maxx {
-			expansionX++
-			expansionX2 += 999_999
-		}
-	}
-
-	for _, val := range emptyRows {
-		if miny < val && val < maxy {
-			expansionY++
-			expansionY2 += 999_999
-		}
-	}
+	expansionX, expansionX2 := expandSpaceBetween(emptyCols, minx, maxx)
+	expansionY, expansionY2 := expandSpaceBetween(emptyRows, miny, maxy)
 
 	dist := (maxx - minx) + (maxy - miny) + expansionX + expansionY
 	dist2 := (maxx - minx) + (maxy - miny) + expansionX2 + expansionY2
 	return dist, dist2
+}
+
+func expandSpaceBetween(emptySpace []int, min, max int) (a, b int) {
+	for _, val := range emptySpace {
+		if min < val && val < max {
+			a++
+			b += 999_999
+		}
+	}
+	return
 }
 
 func getEmptySpace(universe []string, galaxies map[Point]bool) ([]int, []int) {
