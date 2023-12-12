@@ -35,11 +35,11 @@ func day12() {
 func countVariations2(springs []byte, groups []int, cache map[string]int) int {
 	key := string(springs)
 	for _, num := range groups {
-		key += string(num + '0')
+		key += strconv.Itoa(num)
 	}
 
-	if _, found := cache[key]; found {
-		return cache[key]
+	if val, found := cache[key]; found {
+		return val
 	}
 
 	// no more springs to check
@@ -57,9 +57,8 @@ func countVariations2(springs []byte, groups []int, cache map[string]int) int {
 	count := 0
 	// check both variations
 	if springs[0] == '?' {
-		dup1 := dup(springs)
-		dup1[0] = '.'
-		count += countVariations2(dup1, groups, cache)
+		// skip operational spring
+		count += countVariations2(springs[1:], groups, cache)
 		dup2 := dup(springs)
 		dup2[0] = '#'
 		count += countVariations2(dup2, groups, cache)
@@ -68,7 +67,7 @@ func countVariations2(springs []byte, groups []int, cache map[string]int) int {
 		return count
 	}
 
-	// skip character (todo: refactor)
+	// skip operational spring
 	if springs[0] == '.' {
 		return countVariations2(springs[1:], groups, cache)
 	}
