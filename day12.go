@@ -41,20 +41,19 @@ func countVariations(springs []byte, groups []int, start int) int {
 }
 
 func checkVariation(springs []byte, groups []int) bool {
-	group := 0
 	for i := 0; i < len(springs); i++ {
 		if springs[i] == '#' {
 			start := i
 			for ; i < len(springs) && springs[i] == '#'; i++ {
 			}
-			if group < len(groups) && i-start != groups[group] {
-				return false
+			if 0 < len(groups) && i-start == groups[0] {
+				groups = groups[1:]
 			} else {
-				group++
+				return false
 			}
 		}
 	}
-	return group == len(groups)
+	return len(groups) == 0
 }
 
 func commaSepToIntArr(data []string) []int {
