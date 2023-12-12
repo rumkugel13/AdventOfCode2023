@@ -14,7 +14,7 @@ func day12() {
 		split := strings.Fields(line)
 		springs := split[0]
 		groups := commaSepToIntArr(strings.Split(split[1], ","))
-		variationSum += countVariations(springs, groups)
+		variationSum += countVariations([]byte(springs), groups, 0)
 	}
 
 	var result = variationSum
@@ -23,39 +23,21 @@ func day12() {
 	fmt.Println("Day 12 Part 2 Result: ", result2)
 }
 
-func countVariations(springs string, groups []int) int {
-	count := 0
-	data := []byte(springs)
-	variations := makeVariations(data, 0)
-	for _, variation := range variations {
-		if checkVariation(variation, groups) {
-			count++
-		}
-	}
-	return count
-}
-
-func makeVariations(springs []byte, start int) [][]byte {
-	variations := [][]byte{}
-	complete := true
+func countVariations(springs []byte, groups []int, start int) int {
 	for i := start; i < len(springs); i++ {
 		if springs[i] == '?' {
-			var springCopy = make([]byte, len(springs))
-			copy(springCopy, springs)
-			springCopy[i] = '.'
-			variations = append(variations, makeVariations(springCopy, i+1)...)
-			var springCopy2 = make([]byte, len(springs))
-			copy(springCopy2, springs)
-			springCopy2[i] = '#'
-			variations = append(variations, makeVariations(springCopy2, i+1)...)
-			complete = false
-			break
+			springs[i] = '.'
+			count := countVariations(springs, groups, i+1)
+			springs[i] = '#'
+			count += countVariations(springs, groups, i+1)
+			springs[i] = '?'
+			return count
 		}
 	}
-	if complete {
-		variations = append(variations, springs)
+	if checkVariation(springs, groups) {
+		return 1
 	}
-	return variations
+	return 0
 }
 
 func checkVariation(springs []byte, groups []int) bool {
