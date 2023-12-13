@@ -123,7 +123,7 @@ func countVariations2(springs []byte, groups []int, cache map[string]int) int {
 
 	// count sequence and check with next group
 	if springs[0] == '#' {
-		i := 0
+		i := 1
 		for ; i < len(springs) && springs[i] != '.' && !(springs[i] == '?' && i == groups[0]); i++ {
 		}
 		if i == groups[0] {
