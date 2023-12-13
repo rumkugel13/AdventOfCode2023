@@ -73,15 +73,28 @@ func countVariations2(springs []byte, groups []int, cache map[string]int) int {
 		return 0
 	}
 
-	groupSum := 0
-	for _,group := range groups {
-		groupSum += group
-	}
+	if len(groups) == 0 {
+		for _, spring := range springs {
+			// no more groups left, but still broken springs
+			if spring == '#' {
+				cache[key] = 0
+				return 0
+			}
+		}
+		// no more groups left, assume all the unknowns as working springs
+		cache[key] = 1
+		return 1
+	} else {
+		groupSum := 0
+		for _, group := range groups {
+			groupSum += group
+		}
 
-	// remaining springs can't accommodate the groups
-	if len(springs) < (groupSum + len(groups) - 1) {
-		cache[key] = 0
-		return 0
+		// remaining springs can't accommodate the groups
+		if len(springs) < (groupSum + len(groups) - 1) {
+			cache[key] = 0
+			return 0
+		}
 	}
 
 	count := 0
