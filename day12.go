@@ -4,26 +4,45 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 func day12() {
 	lines := getLines("input/12.txt")
 
 	variationSum, varSum2 := 0, 0
-	for _, line := range lines {
-		split := strings.Fields(line)
-		springs := []byte(split[0])
-		groups := commaSepToIntArr(strings.Split(split[1], ","))
-		variationSum += countVariations(springs, groups, 0)
+	var wg = &sync.WaitGroup{}
+	ch, ch2 := make(chan int, len(lines)), make(chan int, len(lines))
 
-		p2 := springs
-		p2g := groups
-		for i := 0; i < 4; i++ {
-			p2 = append(p2, '?')
-			p2 = append(p2, springs...)
-			p2g = append(p2g, groups...)
-		}
-		varSum2 += countVariations2(p2, p2g, map[string]int{})
+	wg.Add(len(lines))
+	for _, line := range lines {
+		go func(line string, ch, ch2 chan int) {
+			split := strings.Fields(line)
+			springs := []byte(split[0])
+			groups := commaSepToIntArr(strings.Split(split[1], ","))
+			ch <- countVariations(springs, groups, 0)
+
+			p2 := springs
+			p2g := groups
+			for i := 0; i < 4; i++ {
+				p2 = append(p2, '?')
+				p2 = append(p2, springs...)
+				p2g = append(p2g, groups...)
+			}
+			ch2 <- countVariations2(p2, p2g, map[string]int{})
+			wg.Done()
+		}(line, ch, ch2)
+	}
+	wg.Wait()
+
+	close(ch)
+	close(ch2)
+
+	for num := range ch {
+		variationSum += num
+	}
+	for num := range ch2 {
+		varSum2 += num
 	}
 
 	var result = variationSum
