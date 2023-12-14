@@ -171,19 +171,20 @@ func dup(data []byte) []byte {
 }
 
 func checkVariation(springs []byte, groups []int) bool {
+	sequence := 0
 	for i := 0; i < len(springs); i++ {
 		if springs[i] == '#' {
-			start := i
-			for ; i < len(springs) && springs[i] == '#'; i++ {
-			}
-			if 0 < len(groups) && i-start == groups[0] {
+			sequence++
+		} else if sequence > 0 {
+			if len(groups) > 0 && sequence == groups[0] {
 				groups = groups[1:]
+				sequence = 0
 			} else {
 				return false
 			}
 		}
 	}
-	return len(groups) == 0
+	return (len(groups) == 0 && sequence == 0) || (len(groups) == 1 && sequence == groups[0])
 }
 
 func commaSepToIntArr(data []string) []int {
