@@ -14,7 +14,7 @@ func day14() {
 	rollWest(grid)
 	rollSouth(grid)
 	rollEast(grid)
-	cycleLoad := countRocks(grid)
+	part2 := countRocks(grid)
 	previous := map[string]int{gridToString(grid): 1}
 	targetCycle := 1000000000
 
@@ -23,7 +23,7 @@ func day14() {
 		rollWest(grid)
 		rollSouth(grid)
 		rollEast(grid)
-		cycleLoad = countRocks(grid)
+		part2 = countRocks(grid)
 		hash := gridToString(grid)
 		if cycleStart, found := previous[hash]; found {
 			cycleLength := cycle - cycleStart
@@ -32,7 +32,7 @@ func day14() {
 				rollWest(grid)
 				rollSouth(grid)
 				rollEast(grid)
-				cycleLoad = countRocks(grid)
+				part2 = countRocks(grid)
 			}
 			break
 		}
@@ -40,7 +40,7 @@ func day14() {
 	}
 
 	var result = part1
-	var result2 = cycleLoad
+	var result2 = part2
 	fmt.Println("Day 14 Part 1 Result: ", result)
 	fmt.Println("Day 14 Part 2 Result: ", result2)
 }
@@ -55,30 +55,22 @@ func gridToString(grid [][]byte) string {
 
 func countRocks(grid [][]byte) int {
 	result := 0
-	i := 1
 	for row := len(grid) - 1; row >= 0; row-- {
-		for col := 0; col < len(grid[row]); col++ {
-			if grid[row][col] == 'O' {
-				result += i
+		for _, val := range grid[row] {
+			if val == 'O' {
+				result += len(grid) - row
 			}
 		}
-		i++
 	}
 	return result
 }
 
 func rollNorth(grid [][]byte) {
 	for row := 0; row < len(grid); row++ {
-		for col := 0; col < len(grid[row]); col++ {
-			val := grid[row][col]
+		for col, val := range grid[row] {
 			if val == 'O' {
-				for i := row - 1; i >= 0; i-- {
-					if grid[i][col] == '.' {
-						grid[i+1][col] = '.'
-						grid[i][col] = 'O'
-					} else {
-						break
-					}
+				for i := row - 1; i >= 0 && grid[i][col] == '.'; i-- {
+					grid[i+1][col], grid[i][col] = grid[i][col], grid[i+1][col]
 				}
 			}
 		}
@@ -87,16 +79,10 @@ func rollNorth(grid [][]byte) {
 
 func rollWest(grid [][]byte) {
 	for col := 0; col < len(grid[0]); col++ {
-		for row := 0; row < len(grid); row++ {
-			val := grid[row][col]
-			if val == 'O' {
-				for i := col - 1; i >= 0; i-- {
-					if grid[row][i] == '.' {
-						grid[row][i+1] = '.'
-						grid[row][i] = 'O'
-					} else {
-						break
-					}
+		for row, line := range grid {
+			if line[col] == 'O' {
+				for i := col - 1; i >= 0 && grid[row][i] == '.'; i-- {
+					grid[row][i+1], grid[row][i] = grid[row][i], grid[row][i+1]
 				}
 			}
 		}
@@ -105,16 +91,10 @@ func rollWest(grid [][]byte) {
 
 func rollSouth(grid [][]byte) {
 	for row := len(grid) - 1; row >= 0; row-- {
-		for col := 0; col < len(grid[row]); col++ {
-			val := grid[row][col]
+		for col, val := range grid[row] {
 			if val == 'O' {
-				for i := row + 1; i < len(grid[row]); i++ {
-					if grid[i][col] == '.' {
-						grid[i-1][col] = '.'
-						grid[i][col] = 'O'
-					} else {
-						break
-					}
+				for i := row + 1; i < len(grid) && grid[i][col] == '.'; i++ {
+					grid[i-1][col], grid[i][col] = grid[i][col], grid[i-1][col]
 				}
 			}
 		}
@@ -123,16 +103,10 @@ func rollSouth(grid [][]byte) {
 
 func rollEast(grid [][]byte) {
 	for col := len(grid[0]) - 1; col >= 0; col-- {
-		for row := len(grid) - 1; row >= 0; row-- {
-			val := grid[row][col]
-			if val == 'O' {
-				for i := col + 1; i < len(grid[0]); i++ {
-					if grid[row][i] == '.' {
-						grid[row][i-1] = '.'
-						grid[row][i] = 'O'
-					} else {
-						break
-					}
+		for row, line := range grid {
+			if line[col] == 'O' {
+				for i := col + 1; i < len(grid[0]) && grid[row][i] == '.'; i++ {
+					grid[row][i-1], grid[row][i] = grid[row][i], grid[row][i-1]
 				}
 			}
 		}
