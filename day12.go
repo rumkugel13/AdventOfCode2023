@@ -52,11 +52,7 @@ func day12() {
 }
 
 func countVariations2(springs []byte, groups []int, cache map[string]int) int {
-	key := string(springs)
-	for _, num := range groups {
-		key += strconv.Itoa(num)
-	}
-
+	key := string(springs) + strconv.Itoa(len(groups))
 	if val, found := cache[key]; found {
 		return val
 	}
