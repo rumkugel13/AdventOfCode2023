@@ -27,25 +27,26 @@ func day16() {
 	fmt.Println("Day 16 Part 2 Result: ", result2)
 }
 
-type CheckPoint struct {
-	point, dir Point
+type TileAndDir struct {
+	tile, dir Point
 }
 
 func walkBeam(grid []string, pos, dir Point) int {
 	energized := make(map[Point]int, len(grid)*len(grid[0]))
-	testPoint := Point{pos.x + dir.x, pos.y + dir.y}
-	stillToCheck := []CheckPoint{{testPoint, dir}}
+	visited := make(map[TileAndDir]bool, len(grid)*len(grid[0]))
+	testTile := Point{pos.x + dir.x, pos.y + dir.y}
+	stillToCheck := []TileAndDir{{testTile, dir}}
 
 	for len(stillToCheck) > 0 {
 		checkNext := stillToCheck[0]
 		stillToCheck = stillToCheck[1:]
-		testPoint = checkNext.point
-		dir = checkNext.dir
+		testTile, dir = checkNext.tile, checkNext.dir
 
 	mainLoop:
-		for insideGrid(grid, testPoint) && energized[testPoint] < 4 {
-			energized[testPoint]++
-			switch grid[testPoint.y][testPoint.x] {
+		for insideGrid(grid, testTile) && !visited[checkNext] {
+			energized[testTile]++
+			visited[checkNext] = true
+			switch grid[testTile.y][testTile.x] {
 			case '/':
 				switch dir {
 				case Point{1, 0}:
@@ -70,24 +71,21 @@ func walkBeam(grid []string, pos, dir Point) int {
 				}
 			case '-':
 				switch dir {
-				case Point{0, 1}:
-					fallthrough
-				case Point{0, -1}:
-					stillToCheck = append(stillToCheck, CheckPoint{testPoint, Point{1, 0}})
-					stillToCheck = append(stillToCheck, CheckPoint{testPoint, Point{-1, 0}})
+				case Point{0, 1}, Point{0, -1}:
+					stillToCheck = append(stillToCheck, TileAndDir{testTile, Point{1, 0}})
+					stillToCheck = append(stillToCheck, TileAndDir{testTile, Point{-1, 0}})
 					break mainLoop
 				}
 			case '|':
 				switch dir {
-				case Point{1, 0}:
-					fallthrough
-				case Point{-1, 0}:
-					stillToCheck = append(stillToCheck, CheckPoint{testPoint, Point{0, 1}})
-					stillToCheck = append(stillToCheck, CheckPoint{testPoint, Point{0, -1}})
+				case Point{1, 0}, Point{-1, 0}:
+					stillToCheck = append(stillToCheck, TileAndDir{testTile, Point{0, 1}})
+					stillToCheck = append(stillToCheck, TileAndDir{testTile, Point{0, -1}})
 					break mainLoop
 				}
 			}
-			testPoint = Point{testPoint.x + dir.x, testPoint.y + dir.y}
+			testTile = Point{testTile.x + dir.x, testTile.y + dir.y}
+			checkNext.tile, checkNext.dir = testTile, dir
 		}
 	}
 
@@ -95,6 +93,5 @@ func walkBeam(grid []string, pos, dir Point) int {
 }
 
 func insideGrid(grid []string, pos Point) bool {
-	return pos.x >= 0 && pos.x < len(grid[0]) &&
-		pos.y >= 0 && pos.y < len(grid)
+	return pos.x >= 0 && pos.x < len(grid[0]) && pos.y >= 0 && pos.y < len(grid)
 }
