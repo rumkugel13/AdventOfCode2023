@@ -17,29 +17,21 @@ func day16() {
 	maxEnergized := len(energized)
 	clear(energized)
 	for row := range grid {
-		dir = Point{1, 0}
-		pos = Point{-1, row}
-		walkBeam(grid, pos, dir, energized)
+		walkBeam(grid, Point{-1, row}, Point{1, 0}, energized)
 		maxEnergized = max(maxEnergized, len(energized))
 		clear(energized)
 
-		dir = Point{-1, 0}
-		pos = Point{len(grid[0]), row}
-		walkBeam(grid, pos, dir, energized)
+		walkBeam(grid, Point{len(grid[0]), row}, Point{-1, 0}, energized)
 		maxEnergized = max(maxEnergized, len(energized))
 		clear(energized)
 	}
 
 	for col := range grid[0] {
-		dir = Point{0, 1}
-		pos = Point{col, -1}
-		walkBeam(grid, pos, dir, energized)
+		walkBeam(grid, Point{col, -1}, Point{0, 1}, energized)
 		maxEnergized = max(maxEnergized, len(energized))
 		clear(energized)
 
-		dir = Point{0, -1}
-		pos = Point{col, len(grid)}
-		walkBeam(grid, pos, dir, energized)
+		walkBeam(grid, Point{col, len(grid)}, Point{0, -1}, energized)
 		maxEnergized = max(maxEnergized, len(energized))
 		clear(energized)
 	}
