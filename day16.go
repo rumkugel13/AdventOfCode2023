@@ -32,20 +32,18 @@ type TileAndDir struct {
 }
 
 func walkBeam(grid []string, pos, dir Point) int {
+	dirToNum := map[Point]int{{1, 0}: 1, {0, 1}: 2, {-1, 0}: 4, {0, -1}: 8}
 	energized := make(map[Point]int, len(grid)*len(grid[0]))
-	visited := make(map[TileAndDir]bool, len(grid)*len(grid[0]))
 	testTile := Point{pos.x + dir.x, pos.y + dir.y}
 	stillToCheck := []TileAndDir{{testTile, dir}}
 
 	for len(stillToCheck) > 0 {
-		checkNext := stillToCheck[0]
+		testTile, dir = stillToCheck[0].tile, stillToCheck[0].dir
 		stillToCheck = stillToCheck[1:]
-		testTile, dir = checkNext.tile, checkNext.dir
 
 	mainLoop:
-		for insideGrid(grid, testTile) && !visited[checkNext] {
-			energized[testTile]++
-			visited[checkNext] = true
+		for insideGrid(grid, testTile) && (energized[testTile]&dirToNum[dir]) == 0 {
+			energized[testTile] += dirToNum[dir]
 			switch grid[testTile.y][testTile.x] {
 			case '/':
 				switch dir {
@@ -85,7 +83,6 @@ func walkBeam(grid []string, pos, dir Point) int {
 				}
 			}
 			testTile = Point{testTile.x + dir.x, testTile.y + dir.y}
-			checkNext.tile, checkNext.dir = testTile, dir
 		}
 	}
 
