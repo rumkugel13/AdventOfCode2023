@@ -24,6 +24,7 @@ type HeatState struct {
 func countHeatLoss(grid []string, start, end Point) int {
 	pointsToCheck := []HeatState{{start, Point{0, 0}, 0}}
 	visited := map[HeatState]int{{start, Point{0, 0}, 0}: 0}
+	minHeatLoss := 999999999
 
 	for len(pointsToCheck) > 0 {
 		current := pointsToCheck[0]
@@ -31,7 +32,8 @@ func countHeatLoss(grid []string, start, end Point) int {
 		// fmt.Println("Visiting ", current, getHeatLoss(grid, current.point), " Total ", visited[current])
 
 		if current.point == end {
-			return visited[current]
+			minHeatLoss = min(minHeatLoss, visited[current])
+			// return visited[current]
 		}
 
 		for _, dir := range [4]Point{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
@@ -60,12 +62,14 @@ func countHeatLoss(grid []string, start, end Point) int {
 				continue
 			}
 			visited[nextState] = visited[current] + nextHeatLoss
-			pointsToCheck = queueInsert(grid, pointsToCheck, nextState)
+			// pointsToCheck = queueInsert(grid, pointsToCheck, nextState)
+			pointsToCheck = append(pointsToCheck, nextState)
 		}
 		// fmt.Println("queue", pointsToCheck)
 	}
 
-	return 0
+	return minHeatLoss
+	// return 0
 }
 
 func queueInsert(grid []string, queue []HeatState, state HeatState) []HeatState {
