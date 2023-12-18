@@ -2,17 +2,18 @@ package main
 
 import (
 	"fmt"
-	"sort"
 )
 
 func day17() {
 	grid := getLines("input/17.txt")
 	start, end := Point{0, 0}, Point{len(grid[0]) - 1, len(grid) - 1}
-	heatLoss := countHeatLoss(grid, start, end)
 
+	heatLoss := countHeatLoss(grid, start, end, 1, 3)
 	var result = heatLoss
-	var result2 = 0
 	fmt.Println("Day 17 Part 1 Result: ", result)
+
+	heatLoss2 := countHeatLoss(grid, start, end, 4, 10)
+	var result2 = heatLoss2
 	fmt.Println("Day 17 Part 2 Result: ", result2)
 }
 
@@ -21,8 +22,8 @@ type HeatState struct {
 	sameDirCount int
 }
 
-func countHeatLoss(grid []string, start, end Point) int {
-	pointsToCheck := []HeatState{{start, Point{0, 0}, 0}}
+func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) int {
+	pointsToCheck := []HeatState{{start, Point{1, 0}, 0}, {start, Point{0, 1}, 0}}
 	visited := map[HeatState]int{{start, Point{0, 0}, 0}: 0}
 	minHeatLoss := 999999999
 
@@ -31,7 +32,7 @@ func countHeatLoss(grid []string, start, end Point) int {
 		pointsToCheck = pointsToCheck[1:]
 		// fmt.Println("Visiting ", current, getHeatLoss(grid, current.point), " Total ", visited[current])
 
-		if current.point == end {
+		if current.point == end && current.sameDirCount >= minStreak {
 			minHeatLoss = min(minHeatLoss, visited[current])
 			// return visited[current]
 		}
@@ -47,21 +48,33 @@ func countHeatLoss(grid []string, start, end Point) int {
 				continue
 			}
 
+			totalHeatLoss := visited[current] + getHeatLoss(grid, nextPoint)
 			nextDirCount := 1
 			if dir == current.dir {
 				nextDirCount = current.sameDirCount + 1
+				if nextDirCount <= maxStreak {
+					nextState := HeatState{nextPoint, dir, nextDirCount}
+
+					val, found := visited[nextState]
+					if found && val <= totalHeatLoss {
+						continue
+					}
+					visited[nextState] = totalHeatLoss
+					// pointsToCheck = queueInsert(grid, pointsToCheck, nextState)
+					pointsToCheck = append(pointsToCheck, nextState)
+					continue
+				}
 			}
-			if nextDirCount > 3 {
+			if current.sameDirCount < minStreak || nextDirCount > maxStreak {
 				continue
 			}
 			nextState := HeatState{nextPoint, dir, nextDirCount}
-			nextHeatLoss := getHeatLoss(grid, nextPoint)
 
 			val, found := visited[nextState]
-			if found && val <= visited[current]+nextHeatLoss {
+			if found && val <= totalHeatLoss {
 				continue
 			}
-			visited[nextState] = visited[current] + nextHeatLoss
+			visited[nextState] = totalHeatLoss
 			// pointsToCheck = queueInsert(grid, pointsToCheck, nextState)
 			pointsToCheck = append(pointsToCheck, nextState)
 		}
@@ -70,16 +83,6 @@ func countHeatLoss(grid []string, start, end Point) int {
 
 	return minHeatLoss
 	// return 0
-}
-
-func queueInsert(grid []string, queue []HeatState, state HeatState) []HeatState {
-	i := sort.Search(len(queue), func(i int) bool {
-		return getHeatLoss(grid, queue[i].point) > getHeatLoss(grid, state.point)
-	})
-	queue = append(queue, HeatState{})
-	copy(queue[i+1:], queue[i:])
-	queue[i] = state
-	return queue
 }
 
 func getHeatLoss(grid []string, point Point) int {
