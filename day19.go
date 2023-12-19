@@ -20,6 +20,10 @@ type WorkflowRule struct {
 
 type Workflows = map[string][]WorkflowRule
 
+type PartRange struct {
+	start, end int
+}
+
 func day19() {
 	lines := getLines("input/19.txt")
 	workflows, parts := parseInput(lines)
@@ -44,9 +48,60 @@ func day19() {
 
 	var result = acceptedPartsSum
 	fmt.Println("Day 19 Part 1 Result: ", result)
-	
-	var result2 = 0
+
+	var result2 = countCombinations(workflows, "in", []PartRange{{1, 4000}, {1, 4000}, {1, 4000}, {1, 4000}})
 	fmt.Println("Day 19 Part 2 Result: ", result2)
+}
+
+func countCombinations(workflows Workflows, workflow string, ranges []PartRange) int {
+	if workflow == "R" {
+		return 0
+	}
+	if workflow == "A" {
+		return partRangesProduct(ranges)
+	}
+
+	result := 0
+	currentWorkflow := workflows[workflow]
+	for _, rule := range currentWorkflow {
+		if rule.category == 0 {
+			result += countCombinations(workflows, rule.nextWorkflow, ranges)
+		} else if rule.operation == LessThan {
+			newRanges := make([]PartRange, len(ranges))
+			copy(newRanges, ranges[:])
+			rangeIndex := categoryToIndex(rule.category)
+			newRanges[rangeIndex].end = rule.value - 1
+			ranges[rangeIndex].start = rule.value
+			result += countCombinations(workflows, rule.nextWorkflow, newRanges)
+		} else {
+			newRanges := make([]PartRange, len(ranges))
+			copy(newRanges, ranges[:])
+			rangeIndex := categoryToIndex(rule.category)
+			newRanges[rangeIndex].start = rule.value + 1
+			ranges[rangeIndex].end = rule.value
+			result += countCombinations(workflows, rule.nextWorkflow, newRanges)
+		}
+	}
+	return result
+}
+
+func categoryToIndex(category byte) int {
+	if category == 'x' {
+		return 0
+	} else if category == 'm' {
+		return 1
+	} else if category == 'a' {
+		return 2
+	}
+	return 3
+}
+
+func partRangesProduct(ranges []PartRange) int {
+	result := 1
+	for _,r := range ranges {
+		result *= r.end - r.start + 1
+	}
+	return result
 }
 
 func partRatingsSum(part map[byte]int) int {
