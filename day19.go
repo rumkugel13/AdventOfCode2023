@@ -64,19 +64,17 @@ func countCombinations(workflows Workflows, workflow string, ranges []PartRange)
 	result := 0
 	currentWorkflow := workflows[workflow]
 	for _, rule := range currentWorkflow {
+		newRanges := make([]PartRange, len(ranges))
+		copy(newRanges, ranges[:])
+		rangeIndex := map[byte]int{'x': 0, 'm': 1, 'a': 2, 's': 3}[rule.category]
+
 		if rule.category == 0 {
 			result += countCombinations(workflows, rule.nextWorkflow, ranges)
 		} else if rule.operation == LessThan {
-			newRanges := make([]PartRange, len(ranges))
-			copy(newRanges, ranges[:])
-			rangeIndex := categoryToIndex(rule.category)
 			newRanges[rangeIndex].end = rule.value - 1
 			ranges[rangeIndex].start = rule.value
 			result += countCombinations(workflows, rule.nextWorkflow, newRanges)
 		} else {
-			newRanges := make([]PartRange, len(ranges))
-			copy(newRanges, ranges[:])
-			rangeIndex := categoryToIndex(rule.category)
 			newRanges[rangeIndex].start = rule.value + 1
 			ranges[rangeIndex].end = rule.value
 			result += countCombinations(workflows, rule.nextWorkflow, newRanges)
@@ -85,20 +83,9 @@ func countCombinations(workflows Workflows, workflow string, ranges []PartRange)
 	return result
 }
 
-func categoryToIndex(category byte) int {
-	if category == 'x' {
-		return 0
-	} else if category == 'm' {
-		return 1
-	} else if category == 'a' {
-		return 2
-	}
-	return 3
-}
-
 func partRangesProduct(ranges []PartRange) int {
 	result := 1
-	for _,r := range ranges {
+	for _, r := range ranges {
 		result *= r.end - r.start + 1
 	}
 	return result
