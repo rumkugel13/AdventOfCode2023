@@ -16,7 +16,7 @@ type Module struct {
 	moduleType    int
 	destinations  []string
 	prevStates    map[string]bool
-	flipFlipState *bool
+	flipFlopState *bool
 }
 
 func day20() {
@@ -26,10 +26,8 @@ func day20() {
 	lowPulseCount, highPulseCount := 0, 0
 	hasInputs := []Module{}
 	for i := 0; i < 1000; i++ {
-		modules["broadcaster"].prevStates["button"] = false
-		// fmt.Println("button", false, "broadcaster")
-		lowPulseCount++
-		hasInputs = append(hasInputs, modules["broadcaster"])
+		inputs := sendPulse(modules, false, "button", []string{"broadcaster"}, &lowPulseCount, &highPulseCount)
+		hasInputs = append(hasInputs, inputs...)
 		for len(hasInputs) > 0 {
 			currentModule := hasInputs[0]
 			hasInputs = hasInputs[1:]
@@ -38,16 +36,14 @@ func day20() {
 			case Broadcaster:
 				pulse := currentModule.prevStates["button"]
 				delete(currentModule.prevStates, "button")
-				low, high, inputs := sendPulse(modules, pulse, currentModule.name, currentModule.destinations)
+				inputs := sendPulse(modules, pulse, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
 				hasInputs = append(hasInputs, inputs...)
-				lowPulseCount, highPulseCount = lowPulseCount+low, highPulseCount+high
 			case FlipFlop:
 				for _, pulse := range currentModule.prevStates {
 					if !pulse {
-						*currentModule.flipFlipState = !*currentModule.flipFlipState
-						low, high, inputs := sendPulse(modules, *currentModule.flipFlipState, currentModule.name, currentModule.destinations)
+						*currentModule.flipFlopState = !*currentModule.flipFlopState
+						inputs := sendPulse(modules, *currentModule.flipFlopState, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
 						hasInputs = append(hasInputs, inputs...)
-						lowPulseCount, highPulseCount = lowPulseCount+low, highPulseCount+high
 					}
 				}
 				clear(currentModule.prevStates)
@@ -58,9 +54,8 @@ func day20() {
 						totalPulse = false
 					}
 				}
-				low, high, inputs := sendPulse(modules, !totalPulse, currentModule.name, currentModule.destinations)
+				inputs := sendPulse(modules, !totalPulse, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
 				hasInputs = append(hasInputs, inputs...)
-				lowPulseCount, highPulseCount = lowPulseCount+low, highPulseCount+high
 			}
 		}
 	}
@@ -71,25 +66,18 @@ func day20() {
 	fmt.Println("Day 20 Part 2 Result: ", result2)
 }
 
-func sendPulse(modules map[string]Module, pulse bool, sender string, dest []string) (low, high int, inputs []Module) {
+func sendPulse(modules map[string]Module, pulse bool, sender string, dest []string, low, high *int) (inputs []Module) {
 	for _, name := range dest {
-		// fmt.Println(sender, pulse, name)
 		_, found := modules[name]
-		if !found {
-			if pulse {
-				high++
-			} else {
-				low++
-			}
-		} else {
+		if found {
 			modules[name].prevStates[sender] = pulse
 			inputs = append(inputs, modules[name])
-			if pulse {
-				high++
-			} else {
-				low++
-			}
 		}
+	}
+	if pulse {
+		*high += len(dest)
+	} else {
+		*low += len(dest)
 	}
 	return
 }
