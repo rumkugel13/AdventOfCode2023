@@ -26,8 +26,7 @@ func day20() {
 	lowPulseCount, highPulseCount := 0, 0
 	hasInputs := []Module{}
 	for i := 0; i < 1000; i++ {
-		inputs := sendPulse(modules, false, "button", []string{"broadcaster"}, &lowPulseCount, &highPulseCount)
-		hasInputs = append(hasInputs, inputs...)
+		sendPulse(modules, &hasInputs, false, "button", []string{"broadcaster"}, &lowPulseCount, &highPulseCount)
 		for len(hasInputs) > 0 {
 			currentModule := hasInputs[0]
 			hasInputs = hasInputs[1:]
@@ -36,14 +35,12 @@ func day20() {
 			case Broadcaster:
 				pulse := currentModule.prevStates["button"]
 				delete(currentModule.prevStates, "button")
-				inputs := sendPulse(modules, pulse, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
-				hasInputs = append(hasInputs, inputs...)
+				sendPulse(modules, &hasInputs, pulse, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
 			case FlipFlop:
 				for _, pulse := range currentModule.prevStates {
 					if !pulse {
 						*currentModule.flipFlopState = !*currentModule.flipFlopState
-						inputs := sendPulse(modules, *currentModule.flipFlopState, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
-						hasInputs = append(hasInputs, inputs...)
+						sendPulse(modules, &hasInputs, *currentModule.flipFlopState, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
 					}
 				}
 				clear(currentModule.prevStates)
@@ -54,8 +51,7 @@ func day20() {
 						totalPulse = false
 					}
 				}
-				inputs := sendPulse(modules, !totalPulse, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
-				hasInputs = append(hasInputs, inputs...)
+				sendPulse(modules, &hasInputs, !totalPulse, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
 			}
 		}
 	}
@@ -66,12 +62,12 @@ func day20() {
 	fmt.Println("Day 20 Part 2 Result: ", result2)
 }
 
-func sendPulse(modules map[string]Module, pulse bool, sender string, dest []string, low, high *int) (inputs []Module) {
+func sendPulse(modules map[string]Module, inputs *[]Module, pulse bool, sender string, dest []string, low, high *int) {
 	for _, name := range dest {
 		_, found := modules[name]
 		if found {
 			modules[name].prevStates[sender] = pulse
-			inputs = append(inputs, modules[name])
+			*inputs = append(*inputs, modules[name])
 		}
 	}
 	if pulse {
@@ -79,7 +75,6 @@ func sendPulse(modules map[string]Module, pulse bool, sender string, dest []stri
 	} else {
 		*low += len(dest)
 	}
-	return
 }
 
 func parseModules(lines []string) map[string]Module {
