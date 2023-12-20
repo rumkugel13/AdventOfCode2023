@@ -24,42 +24,46 @@ func day20() {
 	modules := parseModules(lines)
 
 	lowPulseCount, highPulseCount := 0, 0
-	hasInputs := []Module{}
 	for i := 0; i < 1000; i++ {
-		sendPulse(modules, &hasInputs, false, "button", []string{"broadcaster"}, &lowPulseCount, &highPulseCount)
-		for len(hasInputs) > 0 {
-			currentModule := hasInputs[0]
-			hasInputs = hasInputs[1:]
-
-			switch currentModule.moduleType {
-			case Broadcaster:
-				pulse := currentModule.prevStates["button"]
-				delete(currentModule.prevStates, "button")
-				sendPulse(modules, &hasInputs, pulse, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
-			case FlipFlop:
-				for _, pulse := range currentModule.prevStates {
-					if !pulse {
-						*currentModule.flipFlopState = !*currentModule.flipFlopState
-						sendPulse(modules, &hasInputs, *currentModule.flipFlopState, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
-					}
-				}
-				clear(currentModule.prevStates)
-			case Conjunction:
-				totalPulse := true
-				for _, pulse := range currentModule.prevStates {
-					if !pulse {
-						totalPulse = false
-					}
-				}
-				sendPulse(modules, &hasInputs, !totalPulse, currentModule.name, currentModule.destinations, &lowPulseCount, &highPulseCount)
-			}
-		}
+		buttonPress(modules, &lowPulseCount, &highPulseCount)
 	}
 
 	var result = lowPulseCount * highPulseCount
 	var result2 = 0
 	fmt.Println("Day 20 Part 1 Result: ", result)
 	fmt.Println("Day 20 Part 2 Result: ", result2)
+}
+
+func buttonPress(modules map[string]Module, lowPulseCount, highPulseCount *int) {
+	hasInputs := []Module{}
+	sendPulse(modules, &hasInputs, false, "button", []string{"broadcaster"}, lowPulseCount, highPulseCount)
+	for len(hasInputs) > 0 {
+		currentModule := hasInputs[0]
+		hasInputs = hasInputs[1:]
+
+		switch currentModule.moduleType {
+		case Broadcaster:
+			pulse := currentModule.prevStates["button"]
+			delete(currentModule.prevStates, "button")
+			sendPulse(modules, &hasInputs, pulse, currentModule.name, currentModule.destinations, lowPulseCount, highPulseCount)
+		case FlipFlop:
+			for _, pulse := range currentModule.prevStates {
+				if !pulse {
+					*currentModule.flipFlopState = !*currentModule.flipFlopState
+					sendPulse(modules, &hasInputs, *currentModule.flipFlopState, currentModule.name, currentModule.destinations, lowPulseCount, highPulseCount)
+				}
+			}
+			clear(currentModule.prevStates)
+		case Conjunction:
+			totalPulse := true
+			for _, pulse := range currentModule.prevStates {
+				if !pulse {
+					totalPulse = false
+				}
+			}
+			sendPulse(modules, &hasInputs, !totalPulse, currentModule.name, currentModule.destinations, lowPulseCount, highPulseCount)
+		}
+	}
 }
 
 func sendPulse(modules map[string]Module, inputs *[]Module, pulse bool, sender string, dest []string, low, high *int) {
