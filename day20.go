@@ -21,20 +21,19 @@ type Module struct {
 
 func day20() {
 	lines := getLines("input/20.txt")
-	modules, p2 := parseModules(lines)
-	fmt.Println(p2)
+	modules, modulesForPart2 := parseModules(lines)
 
-	iterations := map[string]int{}
-	for _, name := range p2 {
-		iterations[name] = 999999999
+	cyclesPart2 := map[string]int{}
+	for _, name := range modulesForPart2 {
+		cyclesPart2[name] = 999999999
 	}
 
 	finished := true
 	lowPulseCount, highPulseCount := 0, 0
 	i := 1
 	for ; i <= 1000; i++ {
-		buttonPress(modules, &lowPulseCount, &highPulseCount, iterations, i)
-		for _, val := range iterations {
+		buttonPress(modules, &lowPulseCount, &highPulseCount, cyclesPart2, i)
+		for _, val := range cyclesPart2 {
 			if val == 999999999 {
 				finished = false
 			}
@@ -46,20 +45,20 @@ func day20() {
 
 	for ; !finished; i++ {
 		finished = true
-		buttonPress(modules, &lowPulseCount, &highPulseCount, iterations, i)
-		for _, val := range iterations {
+		buttonPress(modules, &lowPulseCount, &highPulseCount, cyclesPart2, i)
+		for _, val := range cyclesPart2 {
 			if val == 999999999 {
 				finished = false
 			}
 		}
 	}
 
-	values := []int{}
-	for _, val := range iterations {
-		values = append(values, val)
+	valuesPart2 := []int{}
+	for _, val := range cyclesPart2 {
+		valuesPart2 = append(valuesPart2, val)
 	}
 
-	var result2 = LCM(values[0], values[1], values...)
+	var result2 = LCM(valuesPart2[0], valuesPart2[1], valuesPart2...)
 	fmt.Println("Day 20 Part 2 Result: ", result2)
 }
 
