@@ -21,22 +21,51 @@ type Module struct {
 
 func day20() {
 	lines := getLines("input/20.txt")
-	modules := parseModules(lines)
+	modules, p2 := parseModules(lines)
+	fmt.Println(p2)
 
+	iterations := map[string]int{}
+	for _, name := range p2 {
+		iterations[name] = 999999999
+	}
+
+	finished := true
 	lowPulseCount, highPulseCount := 0, 0
-	for i := 0; i < 1000; i++ {
-		buttonPress(modules, &lowPulseCount, &highPulseCount)
+	i := 1
+	for ; i <= 1000; i++ {
+		buttonPress(modules, &lowPulseCount, &highPulseCount, iterations, i)
+		for _, val := range iterations {
+			if val == 999999999 {
+				finished = false
+			}
+		}
 	}
 
 	var result = lowPulseCount * highPulseCount
-	var result2 = 0
 	fmt.Println("Day 20 Part 1 Result: ", result)
+
+	for ; !finished; i++ {
+		finished = true
+		buttonPress(modules, &lowPulseCount, &highPulseCount, iterations, i)
+		for _, val := range iterations {
+			if val == 999999999 {
+				finished = false
+			}
+		}
+	}
+
+	values := []int{}
+	for _, val := range iterations {
+		values = append(values, val)
+	}
+
+	var result2 = LCM(values[0], values[1], values...)
 	fmt.Println("Day 20 Part 2 Result: ", result2)
 }
 
-func buttonPress(modules map[string]Module, lowPulseCount, highPulseCount *int) {
+func buttonPress(modules map[string]Module, lowPulseCount, highPulseCount *int, iterations map[string]int, iteration int) {
 	hasInputs := []Module{}
-	sendPulse(modules, &hasInputs, false, "button", []string{"broadcaster"}, lowPulseCount, highPulseCount)
+	sendPulse(modules, &hasInputs, false, "button", []string{"broadcaster"}, lowPulseCount, highPulseCount, iterations, iteration)
 	for len(hasInputs) > 0 {
 		currentModule := hasInputs[0]
 		hasInputs = hasInputs[1:]
@@ -45,12 +74,13 @@ func buttonPress(modules map[string]Module, lowPulseCount, highPulseCount *int) 
 		case Broadcaster:
 			pulse := currentModule.prevStates["button"]
 			delete(currentModule.prevStates, "button")
-			sendPulse(modules, &hasInputs, pulse, currentModule.name, currentModule.destinations, lowPulseCount, highPulseCount)
+			sendPulse(modules, &hasInputs, pulse, currentModule.name, currentModule.destinations, lowPulseCount, highPulseCount, iterations, iteration)
 		case FlipFlop:
+			// note: the range might not be in correct order, but it still works if only one of the modules sends a low signal
 			for _, pulse := range currentModule.prevStates {
 				if !pulse {
 					*currentModule.flipFlopState = !*currentModule.flipFlopState
-					sendPulse(modules, &hasInputs, *currentModule.flipFlopState, currentModule.name, currentModule.destinations, lowPulseCount, highPulseCount)
+					sendPulse(modules, &hasInputs, *currentModule.flipFlopState, currentModule.name, currentModule.destinations, lowPulseCount, highPulseCount, iterations, iteration)
 				}
 			}
 			clear(currentModule.prevStates)
@@ -61,12 +91,12 @@ func buttonPress(modules map[string]Module, lowPulseCount, highPulseCount *int) 
 					totalPulse = false
 				}
 			}
-			sendPulse(modules, &hasInputs, !totalPulse, currentModule.name, currentModule.destinations, lowPulseCount, highPulseCount)
+			sendPulse(modules, &hasInputs, !totalPulse, currentModule.name, currentModule.destinations, lowPulseCount, highPulseCount, iterations, iteration)
 		}
 	}
 }
 
-func sendPulse(modules map[string]Module, inputs *[]Module, pulse bool, sender string, dest []string, low, high *int) {
+func sendPulse(modules map[string]Module, inputs *[]Module, pulse bool, sender string, dest []string, low, high *int, iterations map[string]int, iteration int) {
 	for _, name := range dest {
 		_, found := modules[name]
 		if found {
@@ -79,9 +109,14 @@ func sendPulse(modules map[string]Module, inputs *[]Module, pulse bool, sender s
 	} else {
 		*low += len(dest)
 	}
+	for p2 := range iterations {
+		if sender == p2 && !pulse {
+			iterations[sender] = min(iterations[sender], iteration)
+		}
+	}
 }
 
-func parseModules(lines []string) map[string]Module {
+func parseModules(lines []string) (map[string]Module, []string) {
 	modules := map[string]Module{}
 	for _, line := range lines {
 		split := strings.Split(line, " -> ")
@@ -97,13 +132,36 @@ func parseModules(lines []string) map[string]Module {
 		}
 	}
 
+	rxPredecessor := ""
 	for name, module := range modules {
 		for _, val := range module.destinations {
 			if dest, found := modules[val]; found && dest.moduleType == Conjunction {
 				dest.prevStates[name] = false
+			} else if !found && val == "rx" {
+				rxPredecessor = name
 			}
 		}
 	}
 
-	return modules
+	modulesNeededToSendHighPulse := []string{}
+	for name, module := range modules {
+		for _, val := range module.destinations {
+			if val == rxPredecessor {
+				modulesNeededToSendHighPulse = append(modulesNeededToSendHighPulse, name)
+			}
+		}
+	}
+
+	modulesNeededToSendLowPulse := []string{}
+	for name, module := range modules {
+		for _, val := range module.destinations {
+			for _, m := range modulesNeededToSendHighPulse {
+				if m == val {
+					modulesNeededToSendLowPulse = append(modulesNeededToSendLowPulse, name)
+				}
+			}
+		}
+	}
+
+	return modules, modulesNeededToSendLowPulse
 }
