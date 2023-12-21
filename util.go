@@ -32,6 +32,10 @@ func abs(n int) int {
 	return n
 }
 
+func mod(a, n int) int {
+	return ((a % n) + n) % n
+}
+
 func isDigit(a byte) bool {
 	return a >= '0' && a <= '9'
 }
