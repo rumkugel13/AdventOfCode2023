@@ -19,7 +19,7 @@ func day12() {
 		go func(line string, ch, ch2 chan int) {
 			split := strings.Fields(line)
 			springs := []byte(split[0])
-			groups := commaSepToIntArr(strings.Split(split[1], ","))
+			groups := commaSepToIntArr(split[1])
 			ch <- countVariations(springs, groups, 0)
 
 			p2 := springs
@@ -181,13 +181,4 @@ func checkVariation(springs []byte, groups []int) bool {
 		}
 	}
 	return (len(groups) == 0 && sequence == 0) || (len(groups) == 1 && sequence == groups[0])
-}
-
-func commaSepToIntArr(data []string) []int {
-	result := make([]int, len(data))
-	for i, val := range data {
-		num, _ := strconv.Atoi(val)
-		result[i] = num
-	}
-	return result
 }

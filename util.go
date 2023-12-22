@@ -68,3 +68,13 @@ func strToNumArray(numStr string) []int {
 	}
 	return nums
 }
+
+func commaSepToIntArr(line string) []int {
+	data := strings.Split(line, ",")
+	result := make([]int, len(data))
+	for i, val := range data {
+		num, _ := strconv.Atoi(val)
+		result[i] = num
+	}
+	return result
+}

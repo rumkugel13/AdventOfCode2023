@@ -118,7 +118,7 @@ func getBricks(lines []string) []Brick {
 	bricks := make([]Brick, 0, len(lines))
 	for _, line := range lines {
 		split := strings.Split(line, "~")
-		begin, end := commaSepToIntArr(strings.Split(split[0], ",")), commaSepToIntArr(strings.Split(split[1], ","))
+		begin, end := commaSepToIntArr(split[0]), commaSepToIntArr(split[1])
 		bricks = append(bricks, Brick{Cube{begin[0], begin[1], begin[2]}, Cube{end[0], end[1], end[2]}})
 	}
 	return bricks
