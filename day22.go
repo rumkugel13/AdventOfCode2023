@@ -51,22 +51,58 @@ func day22() {
 				unique[idx] = true
 			}
 			mightDisintegrate := true
+			// for each brick above current brick
 			for idx := range unique {
+				// if that bricks only has one brick below it (i.e. the current brick), it would fall
 				if len(bricksBelow[idx]) <= 1 {
 					mightDisintegrate = false
 				}
 			}
 			if mightDisintegrate {
+				// otherwise it can be disintegraed
 				canDisintegrate[brick] = true
 			}
 		} else {
+			// brick doesn't have bricks above
 			canDisintegrate[brick] = true
 		}
 	}
 
 	var result = len(canDisintegrate)
-	var result2 = 0
 	fmt.Println("Day 22 Part 1 Result: ", result)
+
+	part2Sum := 0
+	for i := 0; i < len(bricks); i++ {
+		if _, found := canDisintegrate[i]; !found {
+			// count how many blocks would fall
+			disintegrated := map[int]bool{i: true}
+			checkList := []int{i}
+			for len(checkList) > 0 {
+				// take first from checklist
+				check := checkList[0]
+				checkList = checkList[1:]
+				// for all bricks above, check ...
+				for _, above := range bricksAbove[check] {
+					bricksRemoved := 0
+					// whether all bricks below it are disintegrated ...
+					for _, below := range bricksBelow[above] {
+						if _, found := disintegrated[below]; found {
+							bricksRemoved++
+						}
+					}
+					if len(bricksBelow[above]) == bricksRemoved {
+						// then it would fall
+						checkList = append(checkList, above)
+						disintegrated[above] = true
+					}
+				}
+			}
+			// do not include the brick we are currently checking
+			part2Sum += len(disintegrated) - 1
+		}
+	}
+
+	var result2 = part2Sum
 	fmt.Println("Day 22 Part 2 Result: ", result2)
 }
 
