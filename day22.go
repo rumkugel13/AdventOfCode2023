@@ -23,14 +23,13 @@ func day22() {
 
 	bricksBelow := make(map[int][]int, len(lines))
 	bricksAbove := make(map[int][]int, len(lines))
-	brickMoved := true
 	startIdx := 0
-	for brickMoved {
-		brickMoved = false
+	for startIdx < len(bricks) {
 		for i := startIdx; i < len(bricks); i++ {
-			if canMove, newBrick, bricksTouchingBelow := canMoveDown(bricks[i], bricks[:i]); canMove {
+			if bricks[i].begin.z == 1 {
+				startIdx++
+			} else if canMove, newBrick, bricksTouchingBelow := canMoveDown(bricks[i], bricks[:i]); canMove {
 				bricks[i] = newBrick
-				brickMoved = true
 				break
 			} else {
 				bricksBelow[i] = bricksTouchingBelow
@@ -43,29 +42,20 @@ func day22() {
 	}
 
 	canDisintegrate := map[int]bool{}
+outer:
 	for brick := 0; brick < len(bricks); brick++ {
-		list, found := bricksAbove[brick]
-		if found {
-			unique := make(map[int]bool, len(list))
-			for _, idx := range list {
-				unique[idx] = true
-			}
-			mightDisintegrate := true
+		if list, found := bricksAbove[brick]; found {
 			// for each brick above current brick
-			for idx := range unique {
+			for _, idx := range list {
 				// if that bricks only has one brick below it (i.e. the current brick), it would fall
 				if len(bricksBelow[idx]) <= 1 {
-					mightDisintegrate = false
+					continue outer
 				}
 			}
-			if mightDisintegrate {
-				// otherwise it can be disintegraed
-				canDisintegrate[brick] = true
-			}
-		} else {
-			// brick doesn't have bricks above
-			canDisintegrate[brick] = true
+			// otherwise it can be disintegrated
 		}
+		// also if brick doesn't have bricks above
+		canDisintegrate[brick] = true
 	}
 
 	var result = len(canDisintegrate)
@@ -107,20 +97,15 @@ func day22() {
 }
 
 func canMoveDown(brick Brick, bricksBelow []Brick) (bool, Brick, []int) {
-	if brick.begin.z == 1 {
-		return false, brick, []int{}
-	}
 	brick.begin.z--
 	brick.end.z--
 	bricksTouching := []int{}
-	canMove := true
 	for i, other := range bricksBelow {
 		if bricksOverlap(brick, other) {
-			canMove = false
 			bricksTouching = append(bricksTouching, i)
 		}
 	}
-	return canMove, brick, bricksTouching
+	return len(bricksTouching) == 0, brick, bricksTouching
 }
 
 func bricksOverlap(a, b Brick) bool {
