@@ -46,37 +46,25 @@ func walkBeam(grid []string, pos, dir Point) int {
 			energized[testTile] += dirToNum[dir]
 			switch grid[testTile.y][testTile.x] {
 			case '/':
-				switch dir {
-				case Point{1, 0}:
-					dir = Point{0, -1}
-				case Point{-1, 0}:
-					dir = Point{0, 1}
-				case Point{0, 1}:
-					dir = Point{-1, 0}
-				case Point{0, -1}:
-					dir = Point{1, 0}
+				if dir.x == 0 {
+					dir = dirRight(dir)
+				} else {
+					dir = dirLeft(dir)
 				}
 			case '\\':
-				switch dir {
-				case Point{1, 0}:
-					dir = Point{0, 1}
-				case Point{-1, 0}:
-					dir = Point{0, -1}
-				case Point{0, 1}:
-					dir = Point{1, 0}
-				case Point{0, -1}:
-					dir = Point{-1, 0}
+				if dir.y == 0 {
+					dir = dirRight(dir)
+				} else {
+					dir = dirLeft(dir)
 				}
 			case '-':
-				switch dir {
-				case Point{0, 1}, Point{0, -1}:
+				if dir.x == 0 {
 					stillToCheck = append(stillToCheck, TileAndDir{testTile, Point{1, 0}})
 					stillToCheck = append(stillToCheck, TileAndDir{testTile, Point{-1, 0}})
 					break mainLoop
 				}
 			case '|':
-				switch dir {
-				case Point{1, 0}, Point{-1, 0}:
+				if dir.y == 0 {
 					stillToCheck = append(stillToCheck, TileAndDir{testTile, Point{0, 1}})
 					stillToCheck = append(stillToCheck, TileAndDir{testTile, Point{0, -1}})
 					break mainLoop

@@ -59,6 +59,14 @@ func findInGrid(grid []string, char rune) Point {
 	return Point{-1, -1}
 }
 
+func dirLeft(p Point) Point {
+	return Point{p.y, -p.x}
+}
+
+func dirRight(p Point) Point {
+	return Point{-p.y, p.x}
+}
+
 func strToNumArray(numStr string) []int {
 	fields := strings.Fields(strings.TrimSpace(numStr))
 	var nums = make([]int, len(fields))

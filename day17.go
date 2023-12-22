@@ -59,11 +59,3 @@ func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) in
 
 	return minHeatLoss
 }
-
-func dirLeft(p Point) Point {
-	return Point{p.y, -p.x}
-}
-
-func dirRight(p Point) Point {
-	return Point{-p.y, p.x}
-}
