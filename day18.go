@@ -77,8 +77,7 @@ func findAreaShoelace(nodes []Point) int {
 
 func floodFill(trench map[Point]string, point Point) {
 	trench[point] = ""
-	next := []Point{{point.x, point.y - 1}, {point.x, point.y + 1}, {point.x - 1, point.y}, {point.x + 1, point.y}}
-	for _, p := range next {
+	for _, p := range [4]Point{{point.x, point.y - 1}, {point.x, point.y + 1}, {point.x - 1, point.y}, {point.x + 1, point.y}} {
 		if _, contains := trench[p]; !contains {
 			floodFill(trench, p)
 		}
