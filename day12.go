@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"slices"
 )
 
 func day12() {
@@ -98,7 +99,7 @@ func countVariations2(springs []byte, groups []int, cache map[string]int) int {
 	if springs[0] == '?' {
 		// skip operational spring
 		count += countVariations2(springs[1:], groups, cache)
-		dup2 := dup(springs)
+		dup2 := slices.Clone(springs)
 		dup2[0] = '#'
 		count += countVariations2(dup2, groups, cache)
 
@@ -145,10 +146,10 @@ func countVariations2(springs []byte, groups []int, cache map[string]int) int {
 func countVariations(springs []byte, groups []int, start int) int {
 	for i := start; i < len(springs); i++ {
 		if springs[i] == '?' {
-			dup1 := dup(springs)
+			dup1 := slices.Clone(springs)
 			dup1[i] = '.'
 			count := countVariations(dup1, groups, i+1)
-			dup2 := dup(springs)
+			dup2 := slices.Clone(springs)
 			dup2[i] = '#'
 			count += countVariations(dup2, groups, i+1)
 			return count
@@ -158,12 +159,6 @@ func countVariations(springs []byte, groups []int, start int) int {
 		return 1
 	}
 	return 0
-}
-
-func dup(data []byte) []byte {
-	result := make([]byte, len(data))
-	copy(result, data)
-	return result
 }
 
 func checkVariation(springs []byte, groups []int) bool {
