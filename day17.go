@@ -41,7 +41,7 @@ func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) in
 				continue
 			}
 
-			totalHeatLoss := visited[current] + getHeatLoss(grid, nextPoint)
+			totalHeatLoss := visited[current] + int(grid[nextPoint.y][nextPoint.x] - '0')
 			nextStreak := 1
 			if dir == current.dir {
 				nextStreak = current.streak + 1
@@ -58,10 +58,6 @@ func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) in
 	}
 
 	return minHeatLoss
-}
-
-func getHeatLoss(grid []string, point Point) int {
-	return int(grid[point.y][point.x] - '0')
 }
 
 func dirLeft(p Point) Point {
