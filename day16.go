@@ -88,7 +88,3 @@ func walkBeam(grid []string, pos, dir Point) int {
 
 	return len(energized)
 }
-
-func insideGrid(grid []string, pos Point) bool {
-	return pos.x >= 0 && pos.x < len(grid[0]) && pos.y >= 0 && pos.y < len(grid)
-}
