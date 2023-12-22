@@ -7,7 +7,7 @@ import (
 func day21() {
 	grid := getLines("input/21.txt")
 
-	startingPoint := findStart(grid)
+	startingPoint := findInGrid(grid, 'S')
 	visited := map[Point]bool{startingPoint: true}
 	for i := 0; i < 64; i++ {
 		visited = oneStep(grid, visited, false)

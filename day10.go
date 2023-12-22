@@ -7,7 +7,7 @@ import (
 func day10() {
 	grid := getLines("input/10.txt")
 
-	startingPoint := findStart(grid)
+	startingPoint := findInGrid(grid, 'S')
 	visited := map[Point]int{startingPoint: 0}
 	notChecked := []Point{startingPoint}
 
@@ -49,17 +49,6 @@ func day10() {
 
 	var result2 = countInside
 	fmt.Println("Day 10 Part 2 Result: ", result2)
-}
-
-func findStart(grid []string) Point {
-	for y, row := range grid {
-		for x, col := range row {
-			if byte(col) == 'S' {
-				return Point{x, y}
-			}
-		}
-	}
-	return Point{}
 }
 
 func findStartTile(start Point, grid []string) byte {

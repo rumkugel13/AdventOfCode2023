@@ -48,6 +48,17 @@ func insideGrid(grid []string, pos Point) bool {
 	return pos.x >= 0 && pos.x < len(grid[0]) && pos.y >= 0 && pos.y < len(grid)
 }
 
+func findInGrid(grid []string, char rune) Point {
+	for y, row := range grid {
+		for x, col := range row {
+			if col == char {
+				return Point{x, y}
+			}
+		}
+	}
+	return Point{-1, -1}
+}
+
 func strToNumArray(numStr string) []int {
 	fields := strings.Fields(strings.TrimSpace(numStr))
 	var nums = make([]int, len(fields))
