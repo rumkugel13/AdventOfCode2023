@@ -28,13 +28,20 @@ func day06() {
 	actualTime,_ := strconv.Atoi(strings.ReplaceAll(input[0][5:], " ", ""))
 	actualDist,_ := strconv.Atoi(strings.ReplaceAll(input[1][9:], " ", ""))
 
-	var winningCount = 0
+	start, end := 0,0
 	for time := 1; time < actualTime; time++ {
 		if time * (actualTime - time) > actualDist {
-			winningCount++
+			start = time
+			break
+		}
+	}
+	for time := actualTime; time > 0; time-- {
+		if time * (actualTime - time) > actualDist {
+			end = time
+			break
 		}
 	}
 
-	var result2 = winningCount
+	var result2 = (end - start) + 1
 	fmt.Println("Day 06 Part 2 Result: ", result2)
 }
