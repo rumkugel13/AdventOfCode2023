@@ -19,23 +19,9 @@ func day23() {
 	junctions[start] = true
 	junctions[end] = true
 
-	paths := []Path{}
-	for junction := range junctions {
-		paths = append(paths, getPaths(grid, junction, junctions)...)
-	}
-
-	mappedPaths := map[Point][]Path{}
-	for _, path := range paths {
-		mappedPaths[path.start] = append(mappedPaths[path.start], path)
-	}
-
-	var result2 = findLongestPath(grid, mappedPaths, start, end, 0, map[Point]bool{start: true})
+	paths := getPaths(grid, junctions)
+	var result2 = findLongestPath(grid, paths, start, end, 0, map[Point]bool{start: true})
 	fmt.Println("Day 23 Part 2 Result: ", result2)
-}
-
-type Path struct {
-	start, end Point
-	length     int
 }
 
 func getJunctions(grid []string) map[Point]bool {
@@ -61,43 +47,49 @@ func getJunctions(grid []string) map[Point]bool {
 	return junctions
 }
 
-func getPaths(grid []string, junctionPoint Point, junctions map[Point]bool) []Path {
-	paths := []Path{}
-	for _, startDir := range [4]Point{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
-		currentPoint := Point{junctionPoint.x + startDir.x, junctionPoint.y + startDir.y}
-		if insideGrid(grid, currentPoint) && grid[currentPoint.y][currentPoint.x] != '#' {
-			paths = append(paths, getPath(grid, junctionPoint, currentPoint, startDir, 1, junctions))
+type PathTo struct {
+	end    Point
+	length int
+}
+
+func getPaths(grid []string, junctions map[Point]bool) map[Point][]PathTo {
+	paths := map[Point][]PathTo{}
+	for junctionPoint := range junctions {
+		for _, startDir := range [4]Point{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
+			currentPoint := Point{junctionPoint.x + startDir.x, junctionPoint.y + startDir.y}
+			if insideGrid(grid, currentPoint) && grid[currentPoint.y][currentPoint.x] != '#' {
+				path := getPath(grid, junctionPoint, currentPoint, startDir, 1, junctions)
+				paths[junctionPoint] = append(paths[junctionPoint], path)
+			}
 		}
 	}
-
 	return paths
 }
 
-func getPath(grid []string, pathStart, currentPoint, currentDir Point, pathLength int, junctions map[Point]bool) Path {
+func getPath(grid []string, pathStart, currentPoint, currentDir Point, pathLength int, junctions map[Point]bool) PathTo {
 	for _, dir := range [3]Point{currentDir, dirLeft(currentDir), dirRight(currentDir)} {
 		next := Point{currentPoint.x + dir.x, currentPoint.y + dir.y}
 		if grid[next.y][next.x] != '#' {
 			if _, found := junctions[next]; found {
-				return Path{pathStart, next, pathLength + 1}
+				return PathTo{next, pathLength + 1}
 			} else {
 				return getPath(grid, pathStart, next, dir, pathLength+1, junctions)
 			}
 		}
 	}
-	return Path{pathStart, Point{-1, -1}, 0}
+	return PathTo{Point{-1, -1}, 0}
 }
 
-func findLongestPath(grid []string, paths map[Point][]Path, start, end Point, step int, visited map[Point]bool) int {
-	if start == end {
-		return step
-	}
-	
+func findLongestPath(grid []string, paths map[Point][]PathTo, start, end Point, step int, visited map[Point]bool) int {
 	maxStep := 0
-	for _, nextJunction := range paths[start] {
-		if _, found := visited[nextJunction.end]; !found {
-			visited[nextJunction.end] = true
-			maxStep = max(maxStep, findLongestPath(grid, paths, nextJunction.end, end, step+nextJunction.length, visited))
-			delete(visited, nextJunction.end)
+	for _, path := range paths[start] {
+		if val, found := visited[path.end]; !found || !val {
+			if path.end == end {
+				return step + path.length
+			}
+			visited[path.end] = true
+			maxStep = max(maxStep, findLongestPath(grid, paths, path.end, end, step+path.length, visited))
+			visited[path.end] = false
 		}
 	}
 	return maxStep
