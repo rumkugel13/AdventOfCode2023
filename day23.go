@@ -34,7 +34,7 @@ func walkTrail2(grid []string, start, end, currentDir Point, step int, visited m
 		if grid[next.y][next.x] != '#' {
 			if _, found := visited[next]; !found {
 				visited[next] = true
-				maxStep = max(maxStep, walkTrail2(grid, next, end, dir, step + 1, visited))
+				maxStep = max(maxStep, walkTrail2(grid, next, end, dir, step+1, visited))
 				delete(visited, next)
 			}
 		}
@@ -50,23 +50,9 @@ func walkTrail(grid []string, start, currentDir Point, visited map[Point]int) {
 		next := Point{current.x + dir.x, current.y + dir.y}
 		if insideGrid(grid, next) && grid[next.y][next.x] != '#' {
 			char := grid[next.y][next.x]
-			switch dir {
-			case Point{1, 0}:
-				if char == '<' {
-					continue
-				}
-			case Point{-1, 0}:
-				if char == '>' {
-					continue
-				}
-			case Point{0, 1}:
-				if char == '^' {
-					continue
-				}
-			case Point{0, -1}:
-				if char == 'v' {
-					continue
-				}
+			oppositeChar := map[Point]byte{{1, 0}: '<', {-1, 0}: '>', {0, 1}: '^', {0, -1}: 'v'}
+			if oppositeChar[dir] == char {
+				continue
 			}
 
 			if val, found := visited[next]; !found || val < currentStep+1 {
