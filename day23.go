@@ -13,9 +13,33 @@ func day23() {
 	walkTrail(grid, start, currentDir, visited)
 
 	var result = visited[end]
-	var result2 = 0
 	fmt.Println("Day 23 Part 1 Result: ", result)
+
+	var result2 = walkTrail2(grid, start, end, currentDir, 0, map[Point]bool{start: true})
 	fmt.Println("Day 23 Part 2 Result: ", result2)
+}
+
+func walkTrail2(grid []string, start, end, currentDir Point, step int, visited map[Point]bool) int {
+	current := start
+	if current == end {
+		return step
+	}
+
+	maxStep := 0
+	for _, dir := range [3]Point{currentDir, dirLeft(currentDir), dirRight(currentDir)} {
+		next := Point{current.x + dir.x, current.y + dir.y}
+		if next.x == 1 && next.y == 0 {
+			continue
+		}
+		if grid[next.y][next.x] != '#' {
+			if _, found := visited[next]; !found {
+				visited[next] = true
+				maxStep = max(maxStep, walkTrail2(grid, next, end, dir, step + 1, visited))
+				delete(visited, next)
+			}
+		}
+	}
+	return maxStep
 }
 
 func walkTrail(grid []string, start, currentDir Point, visited map[Point]int) {
