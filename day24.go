@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -10,7 +11,6 @@ func day24() {
 	hailStones := parseHailstones(lines)
 
 	areaMin, areaMax := float64(200000000000000), float64(400000000000000)
-	// areaMin, areaMax := float64(7), float64(27)
 	intersectCount := 0
 	for i := 0; i < len(hailStones)-1; i++ {
 		for j := i + 1; j < len(hailStones); j++ {
@@ -33,9 +33,76 @@ func day24() {
 	}
 
 	var result = intersectCount
-	var result2 = 0
 	fmt.Println("Day 24 Part 1 Result: ", result)
+
+	maybeX, maybeY, maybeZ := []int{}, []int{}, []int{}
+	for i := 0; i < len(hailStones)-1; i++ {
+		for j := i + 1; j < len(hailStones); j++ {
+			a, b := hailStones[i], hailStones[j]
+			if a.vel.x == b.vel.x {
+				nextMaybe := findMatchingVel(int(b.pos.x-a.pos.x), int(a.vel.x))
+				if len(maybeX) == 0 {
+					maybeX = nextMaybe
+				} else {
+					maybeX = getIntersect(maybeX, nextMaybe)
+				}
+			}
+			if a.vel.y == b.vel.y {
+				nextMaybe := findMatchingVel(int(b.pos.y-a.pos.y), int(a.vel.y))
+				if len(maybeY) == 0 {
+					maybeY = nextMaybe
+				} else {
+					maybeY = getIntersect(maybeY, nextMaybe)
+				}
+			}
+			if a.vel.z == b.vel.z {
+				nextMaybe := findMatchingVel(int(b.pos.z-a.pos.z), int(a.vel.z))
+				if len(maybeZ) == 0 {
+					maybeZ = nextMaybe
+				} else {
+					maybeZ = getIntersect(maybeZ, nextMaybe)
+				}
+			}
+		}
+	}
+	fmt.Println(maybeX, maybeY, maybeZ)
+	var result2 = 0
+	if len(maybeX) == len(maybeY) && len(maybeY) == len(maybeZ) && len(maybeZ) == 1 {
+		// only one possible velocity in all dimensions
+		rockVel := Vector3{float64(maybeX[0]), float64(maybeY[0]), float64(maybeZ[0])}
+		hailStoneA, hailStoneB := hailStones[0], hailStones[1]
+		mA := (hailStoneA.vel.y - rockVel.y) / (hailStoneA.vel.x - rockVel.x)
+		mB := (hailStoneB.vel.y - rockVel.y) / (hailStoneB.vel.x - rockVel.x)
+		cA := hailStoneA.pos.y - (mA * hailStoneA.pos.x)
+		cB := hailStoneB.pos.y - (mB * hailStoneB.pos.x)
+		xPos := (cB - cA) / (mA - mB)
+		yPos := mA*xPos + cA
+		time := (xPos - hailStoneA.pos.x) / (hailStoneA.vel.x - rockVel.x)
+		zPos := hailStoneA.pos.z + (hailStoneA.vel.z-rockVel.z)*time
+		result2 = int(xPos + yPos + zPos)
+	}
+
 	fmt.Println("Day 24 Part 2 Result: ", result2)
+}
+
+func findMatchingVel(dvel, pv int) []int {
+	match := []int{}
+	for v := -1000; v < 1000; v++ {
+		if v != pv && dvel%(v-pv) == 0 {
+			match = append(match, v)
+		}
+	}
+	return match
+}
+
+func getIntersect(a, b []int) []int {
+	result := []int{}
+	for _, val := range a {
+		if slices.Contains(b, val) {
+			result = append(result, val)
+		}
+	}
+	return result
 }
 
 type Vector3 struct {
