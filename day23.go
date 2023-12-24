@@ -20,7 +20,9 @@ func day23() {
 	junctions[end] = true
 
 	paths := getPaths(grid, junctions)
-	var result2 = findLongestPath(grid, paths, start, end, 0, map[Point]bool{start: true})
+	visited2 := make([]bool, len(junctions))
+	visited2[paths[start][0].index] = true
+	var result2 = findLongestPath(grid, paths, start, end, 0, visited2)
 	fmt.Println("Day 23 Part 2 Result: ", result2)
 }
 
@@ -48,20 +50,23 @@ func getJunctions(grid []string) map[Point]bool {
 }
 
 type PathTo struct {
-	end    Point
-	length int
+	end           Point
+	length, index int
 }
 
 func getPaths(grid []string, junctions map[Point]bool) map[Point][]PathTo {
 	paths := map[Point][]PathTo{}
+	junctionIndex := 0
 	for junctionPoint := range junctions {
 		for _, startDir := range [4]Point{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
 			currentPoint := Point{junctionPoint.x + startDir.x, junctionPoint.y + startDir.y}
 			if insideGrid(grid, currentPoint) && grid[currentPoint.y][currentPoint.x] != '#' {
 				path := getPath(grid, junctionPoint, currentPoint, startDir, 1, junctions)
+				path.index = junctionIndex
 				paths[junctionPoint] = append(paths[junctionPoint], path)
 			}
 		}
+		junctionIndex++
 	}
 	return paths
 }
@@ -71,25 +76,26 @@ func getPath(grid []string, pathStart, currentPoint, currentDir Point, pathLengt
 		next := Point{currentPoint.x + dir.x, currentPoint.y + dir.y}
 		if grid[next.y][next.x] != '#' {
 			if _, found := junctions[next]; found {
-				return PathTo{next, pathLength + 1}
+				return PathTo{next, pathLength + 1, 0}
 			} else {
 				return getPath(grid, pathStart, next, dir, pathLength+1, junctions)
 			}
 		}
 	}
-	return PathTo{Point{-1, -1}, 0}
+	return PathTo{Point{-1, -1}, 0, 0}
 }
 
-func findLongestPath(grid []string, paths map[Point][]PathTo, start, end Point, step int, visited map[Point]bool) int {
+func findLongestPath(grid []string, paths map[Point][]PathTo, start, end Point, step int, visited []bool) int {
 	maxStep := 0
 	for _, path := range paths[start] {
-		if val, found := visited[path.end]; !found || !val {
+		index := paths[path.end][0].index
+		if !visited[index] {
 			if path.end == end {
 				return step + path.length
 			}
-			visited[path.end] = true
+			visited[index] = true
 			maxStep = max(maxStep, findLongestPath(grid, paths, path.end, end, step+path.length, visited))
-			visited[path.end] = false
+			visited[index] = false
 		}
 	}
 	return maxStep
