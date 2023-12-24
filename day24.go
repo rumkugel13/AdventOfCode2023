@@ -65,7 +65,7 @@ func day24() {
 			}
 		}
 	}
-	fmt.Println(maybeX, maybeY, maybeZ)
+	
 	var result2 = 0
 	if len(maybeX) == len(maybeY) && len(maybeY) == len(maybeZ) && len(maybeZ) == 1 {
 		// only one possible velocity in all dimensions
