@@ -81,7 +81,7 @@ func commaSepToIntArr(line string) []int {
 	data := strings.Split(line, ",")
 	result := make([]int, len(data))
 	for i, val := range data {
-		num, _ := strconv.Atoi(val)
+		num, _ := strconv.Atoi(strings.TrimSpace(val))
 		result[i] = num
 	}
 	return result
