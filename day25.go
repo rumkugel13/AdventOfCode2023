@@ -64,8 +64,14 @@ func findAndRemoveMax(edges map[Edge]int) Edge {
 
 func countEdges(nodes map[string][]string) map[Edge]int {
 	encountered := map[Edge]int{}
+	i := 0
 	for from := range nodes {
 		walkNodes(nodes, from, encountered)
+		i++
+		// if this doesn't work, increase value
+		if i > 32 {
+			break
+		}
 	}
 	return encountered
 }
