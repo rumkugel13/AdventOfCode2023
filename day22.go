@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 )
 
 type Cube struct {
@@ -61,39 +62,55 @@ outer:
 	var result = len(canDisintegrate)
 	fmt.Println("Day 22 Part 1 Result: ", result)
 
+	var wg = &sync.WaitGroup{}
+	ch := make(chan int, len(bricks))
+
 	part2Sum := 0
+	wg.Add(len(bricks))
 	for i := 0; i < len(bricks); i++ {
-		if _, found := canDisintegrate[i]; !found {
-			// count how many blocks would fall
-			disintegrated := map[int]bool{i: true}
-			checkList := []int{i}
-			for len(checkList) > 0 {
-				// take first from checklist
-				check := checkList[0]
-				checkList = checkList[1:]
-				// for all bricks above, check ...
-				for _, above := range bricksAbove[check] {
-					bricksRemoved := 0
-					// whether all bricks below it are disintegrated ...
-					for _, below := range bricksBelow[above] {
-						if _, found := disintegrated[below]; found {
-							bricksRemoved++
-						}
-					}
-					if len(bricksBelow[above]) == bricksRemoved {
-						// then it would fall
-						checkList = append(checkList, above)
-						disintegrated[above] = true
-					}
-				}
+		go func(i int, ch chan int){
+			if _, found := canDisintegrate[i]; !found {
+			ch <- countDisintegrated(bricksBelow, bricksAbove, i)
 			}
-			// do not include the brick we are currently checking
-			part2Sum += len(disintegrated) - 1
-		}
+			wg.Done()
+		}(i, ch)
+	}
+	wg.Wait()
+	close(ch)
+	for num := range ch {
+		part2Sum += num
 	}
 
 	var result2 = part2Sum
 	fmt.Println("Day 22 Part 2 Result: ", result2)
+}
+
+func countDisintegrated(bricksBelow, bricksAbove map[int][]int, i int) int {
+	// count how many blocks would fall
+	disintegrated := map[int]bool{i: true}
+	checkList := []int{i}
+	for len(checkList) > 0 {
+		// take first from checklist
+		check := checkList[0]
+		checkList = checkList[1:]
+		// for all bricks above, check ...
+		for _, above := range bricksAbove[check] {
+			bricksRemoved := 0
+			// whether all bricks below it are disintegrated ...
+			for _, below := range bricksBelow[above] {
+				if _, found := disintegrated[below]; found {
+					bricksRemoved++
+				}
+			}
+			if len(bricksBelow[above]) == bricksRemoved {
+				// then it would fall
+				checkList = append(checkList, above)
+				disintegrated[above] = true
+			}
+		}
+	}
+	// do not include the brick we are currently checking
+	return len(disintegrated) - 1
 }
 
 func canMoveDown(brick Brick, bricksBelow []Brick) (bool, Brick, []int) {
