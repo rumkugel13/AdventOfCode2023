@@ -23,7 +23,8 @@ func day25() {
 	third := findAndRemoveMax(edgeCount)
 	removeEdge(nodes, third)
 
-	countA, countB := countNodes(nodes, first.from), countNodes(nodes, first.to)
+	countA := countNodes(nodes, first.from)
+	countB := len(nodes) - countA
 
 	var result = countA * countB
 	var result2 = 0
