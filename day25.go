@@ -69,7 +69,7 @@ func countEdges(nodes map[string][]string) map[Edge]int {
 		walkNodes(nodes, from, encountered)
 		i++
 		// if this doesn't work, increase value
-		if i > 32 {
+		if i > 50 {
 			break
 		}
 	}
