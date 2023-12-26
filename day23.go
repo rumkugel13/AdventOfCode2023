@@ -88,11 +88,11 @@ func getPath(grid []string, pathStart, currentPoint, currentDir Point, pathLengt
 func findLongestPath(grid []string, paths map[Point][]PathTo, start, end Point, step int, visited []bool) int {
 	maxStep := 0
 	for _, path := range paths[start] {
+		if path.end == end {
+			return step + path.length
+		}
 		index := paths[path.end][0].index
 		if !visited[index] {
-			if path.end == end {
-				return step + path.length
-			}
 			visited[index] = true
 			maxStep = max(maxStep, findLongestPath(grid, paths, path.end, end, step+path.length, visited))
 			visited[index] = false
