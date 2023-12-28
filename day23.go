@@ -19,7 +19,7 @@ func day23() {
 	junctions[start] = true
 	junctions[end] = true
 
-	paths := getPaths(grid, junctions)
+	paths := getPaths(grid, junctions, start, end)
 	visited2 := make([]bool, len(junctions))
 	visited2[paths[start][0].index] = true
 	var result2 = findLongestPath(grid, paths, start, end, 0, visited2)
@@ -54,17 +54,28 @@ type PathTo struct {
 	length, index int
 }
 
-func getPaths(grid []string, junctions map[Point]bool) map[Point][]PathTo {
+func getPaths(grid []string, junctions map[Point]bool, start, end Point) map[Point][]PathTo {
 	paths := map[Point][]PathTo{}
 	junctionIndex := 0
 	for junctionPoint := range junctions {
-		for _, startDir := range [4]Point{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
+		blocked := -1
+		for i, startDir := range [4]Point{{0, -1}, {-1, 0}, {0, 1}, {1, 0}} {
 			currentPoint := Point{junctionPoint.x + startDir.x, junctionPoint.y + startDir.y}
 			if insideGrid(grid, currentPoint) && grid[currentPoint.y][currentPoint.x] != '#' {
 				path := getPath(grid, junctionPoint, currentPoint, startDir, 1, junctions)
 				path.index = junctionIndex
 				paths[junctionPoint] = append(paths[junctionPoint], path)
+			} else {
+				blocked = i
 			}
+		}
+		if blocked != -1 && junctionPoint != start && junctionPoint != end {
+			removeIndex := 0
+			if blocked == 2 {
+				// note: if up is blocked, then left is at index 0, otherwise at 1
+				removeIndex = 1
+			} 
+			paths[junctionPoint] = append(paths[junctionPoint][:removeIndex], paths[junctionPoint][removeIndex+1:]...)
 		}
 		junctionIndex++
 	}
