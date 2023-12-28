@@ -31,22 +31,36 @@ func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) in
 		current := pointsToCheck[0]
 		pointsToCheck = pointsToCheck[1:]
 
-		if current.point == end && current.streak >= minStreak {
-			minHeatLoss = min(minHeatLoss, visited[current])
+		if current.point == end {
+			if current.streak >= minStreak {
+				minHeatLoss = min(minHeatLoss, visited[current])
+			}
+			continue
 		}
 
-		nextState := HeatState{Point{current.point.x + current.dir.x, current.point.y + current.dir.y}, current.dir, current.streak + 1}
-		if insideGrid(grid, nextState.point) && current.streak < maxStreak {
-			totalHeatLoss := visited[current] + int(grid[nextState.point.y][nextState.point.x]-'0')
-			if val, found := visited[nextState]; !found || val > totalHeatLoss {
-				visited[nextState] = totalHeatLoss
-				pointsToCheck = append(pointsToCheck, nextState)
+		skipLeft, skipRight := false, false
+		nextPoint := Point{current.point.x + current.dir.x, current.point.y + current.dir.y}
+		if insideGrid(grid, nextPoint) {
+			if current.streak < maxStreak {
+				nextState := HeatState{nextPoint, current.dir, current.streak + 1}
+				totalHeatLoss := visited[current] + int(grid[nextState.point.y][nextState.point.x]-'0')
+				if val, found := visited[nextState]; !found || val > totalHeatLoss {
+					visited[nextState] = totalHeatLoss
+					pointsToCheck = append(pointsToCheck, nextState)
+				}
+			}
+		} else {
+			if current.dir.x == 1 || current.dir.y == -1 {
+				skipLeft = true
+			} else if current.dir.y == 1 || current.dir.x == -1 {
+				skipRight = true
 			}
 		}
 
 		leftDir := dirLeft(current.dir)
-		nextState = HeatState{Point{current.point.x + leftDir.x, current.point.y + leftDir.y}, leftDir, 1}
-		if insideGrid(grid, nextState.point) && current.streak >= minStreak {
+		nextPoint = Point{current.point.x + leftDir.x, current.point.y + leftDir.y}
+		if !skipLeft && insideGrid(grid, nextPoint) && current.streak >= minStreak {
+			nextState := HeatState{nextPoint, leftDir, 1}
 			totalHeatLoss := visited[current] + int(grid[nextState.point.y][nextState.point.x]-'0')
 			if val, found := visited[nextState]; !found || val > totalHeatLoss {
 				visited[nextState] = totalHeatLoss
@@ -55,8 +69,9 @@ func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) in
 		}
 
 		rightDir := dirRight(current.dir)
-		nextState = HeatState{Point{current.point.x + rightDir.x, current.point.y + rightDir.y}, rightDir, 1}
-		if insideGrid(grid, nextState.point) && current.streak >= minStreak {
+		nextPoint = Point{current.point.x + rightDir.x, current.point.y + rightDir.y}
+		if !skipRight && insideGrid(grid, nextPoint) && current.streak >= minStreak {
+			nextState := HeatState{nextPoint, rightDir, 1}
 			totalHeatLoss := visited[current] + int(grid[nextState.point.y][nextState.point.x]-'0')
 			if val, found := visited[nextState]; !found || val > totalHeatLoss {
 				visited[nextState] = totalHeatLoss
