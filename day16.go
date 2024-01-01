@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
 func day16() {
@@ -12,15 +13,30 @@ func day16() {
 	var result = walkBeam(grid, pos, dir)
 	fmt.Println("Day 16 Part 1 Result: ", result)
 
-	maxEnergized := 0
+	energized := make(chan int, (len(grid)+len(grid[0]))*2)
+	wg := &sync.WaitGroup{}
+	wg.Add((len(grid) + len(grid[0])))
 	for row := range grid {
-		maxEnergized = max(maxEnergized, walkBeam(grid, Point{-1, row}, Point{1, 0}))
-		maxEnergized = max(maxEnergized, walkBeam(grid, Point{len(grid[0]), row}, Point{-1, 0}))
+		go func(row int, energized chan int) {
+			energized <- walkBeam(grid, Point{-1, row}, Point{1, 0})
+			energized <- walkBeam(grid, Point{len(grid[0]), row}, Point{-1, 0})
+			wg.Done()
+		}(row, energized)
 	}
 
 	for col := range grid[0] {
-		maxEnergized = max(maxEnergized, walkBeam(grid, Point{col, -1}, Point{0, 1}))
-		maxEnergized = max(maxEnergized, walkBeam(grid, Point{col, len(grid)}, Point{0, -1}))
+		go func(col int, energized chan int) {
+			walkBeam(grid, Point{col, -1}, Point{0, 1})
+			walkBeam(grid, Point{col, len(grid)}, Point{0, -1})
+			wg.Done()
+		}(col, energized)
+	}
+	wg.Wait()
+	close(energized)
+
+	maxEnergized := 0
+	for val := range energized {
+		maxEnergized = max(maxEnergized, val)
 	}
 
 	var result2 = maxEnergized
