@@ -53,6 +53,11 @@ func day12() {
 }
 
 func countVariations2(springs []byte, groups []int, cache map[string]int) int {
+	// skip operational spring
+	for len(springs) > 0 && springs[0] == '.' {
+		springs = springs[1:]
+	}
+
 	key := string(springs) + strconv.Itoa(len(groups))
 	if val, found := cache[key]; found {
 		return val
@@ -105,11 +110,6 @@ func countVariations2(springs []byte, groups []int, cache map[string]int) int {
 
 		cache[key] = count
 		return count
-	}
-
-	// skip operational spring
-	if springs[0] == '.' {
-		return countVariations2(springs[1:], groups, cache)
 	}
 
 	// no groups left for #-sequences
