@@ -23,17 +23,19 @@ type HeatState struct {
 }
 
 func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) int {
-	pointsToCheck := []HeatState{{start, Point{1, 0}, 0}, {start, Point{0, 1}, 0}}
-	visited := map[HeatState]int{{start, Point{0, 0}, 0}: 0}
 	minHeatLoss := 999999999
+	queue := BucketHeap{map[int][]HeatState{}, minHeatLoss}
+	queue.insert(HeatState{start, Point{1, 0}, 0}, 0)
+	queue.insert(HeatState{start, Point{0, 1}, 0}, 0)
+	visited := map[HeatState]int{{start, Point{0, 0}, 0}: 0}
 
-	for len(pointsToCheck) > 0 {
-		current := pointsToCheck[0]
-		pointsToCheck = pointsToCheck[1:]
+	for len(queue.buckets) > 0 {
+		current := queue.popMin()
 
 		if current.point == end {
 			if current.streak >= minStreak {
 				minHeatLoss = min(minHeatLoss, visited[current])
+				break
 			}
 			continue
 		}
@@ -46,7 +48,7 @@ func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) in
 				totalHeatLoss := visited[current] + int(grid[nextState.point.y][nextState.point.x]-'0')
 				if val, found := visited[nextState]; !found || val > totalHeatLoss {
 					visited[nextState] = totalHeatLoss
-					pointsToCheck = append(pointsToCheck, nextState)
+					queue.insert(nextState, totalHeatLoss)
 				}
 			}
 		} else {
@@ -64,7 +66,7 @@ func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) in
 			totalHeatLoss := visited[current] + int(grid[nextState.point.y][nextState.point.x]-'0')
 			if val, found := visited[nextState]; !found || val > totalHeatLoss {
 				visited[nextState] = totalHeatLoss
-				pointsToCheck = append(pointsToCheck, nextState)
+				queue.insert(nextState, totalHeatLoss)
 			}
 		}
 
@@ -75,10 +77,39 @@ func countHeatLoss(grid []string, start, end Point, minStreak, maxStreak int) in
 			totalHeatLoss := visited[current] + int(grid[nextState.point.y][nextState.point.x]-'0')
 			if val, found := visited[nextState]; !found || val > totalHeatLoss {
 				visited[nextState] = totalHeatLoss
-				pointsToCheck = append(pointsToCheck, nextState)
+				queue.insert(nextState, totalHeatLoss)
 			}
 		}
 	}
 
 	return minHeatLoss
+}
+
+type BucketHeap struct {
+	buckets   map[int][]HeatState
+	minBucket int
+}
+
+func (bh *BucketHeap) insert(state HeatState, heatloss int) {
+	bh.buckets[heatloss] = append(bh.buckets[heatloss], state)
+	if heatloss < bh.minBucket {
+		bh.minBucket = heatloss
+	}
+}
+
+func (bh *BucketHeap) popMin() HeatState {
+	minHeatstate := bh.buckets[bh.minBucket][0]
+	bh.buckets[bh.minBucket] = bh.buckets[bh.minBucket][1:]
+
+	if len(bh.buckets[bh.minBucket]) == 0 {
+		delete(bh.buckets, bh.minBucket)
+		bh.minBucket = 999999999
+		for bucket := range bh.buckets {
+			if bucket < bh.minBucket {
+				bh.minBucket = bucket
+			}
+		}
+	}
+
+	return minHeatstate
 }
